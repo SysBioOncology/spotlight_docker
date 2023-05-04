@@ -12,11 +12,13 @@ RUN apt-get install -y python3-openslide
 RUN apt install python3.8-venv
 RUN python3 -m venv /spotlight_venv
 RUN . spotlight_venv/bin/activate
-RUN pip3 install pandas numpy opencv-python openslide-python tensorflow pyarrow dask scipy scikit_learn tornado tf_slim
+#RUN pip3 install pandas numpy opencv-python openslide-python tensorflow pyarrow dask scipy scikit_learn tornado tf_slim git
+COPY ./env_requirements.txt ./
+RUN pip3 install -r env_requirements.txt
 
 # Set up required data #
-COPY Python/ Python/
-COPY run_scripts/ run_scripts/
+COPY Python/ ./
+COPY run_scripts/ ./
 
 # Set up directories #
 WORKDIR /
