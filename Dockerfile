@@ -17,8 +17,8 @@ COPY ./env_requirements.txt ./
 RUN pip3 install -r env_requirements.txt
 
 # Set up required data #
-COPY Python/ ./
-COPY run_scripts/ ./
+COPY Python/ /Python
+COPY run_scripts/ /run_scripts
 
 # Set up directories #
 WORKDIR /
@@ -29,7 +29,7 @@ WORKDIR /
 
 # 1. Extract 1,536 histopathological features computed using PC-CHiP from Fu et al.
 
-CMD ["bash", "/run_scripts/1_extract_histopatho_features.sh", "/data_example/example_slide.ndpi", "/data_example/generated_clinical_file.txt", "FFPE", "/output_example"]
+CMD ["bash", "/run_scripts/1_extract_histopatho_features.sh", "/data_example/example_slide.ndpi", "/data_example/generated_clinical_file.txt", "/data/checkpoint/Retrained_Inception_v4/" ,"FFPE", "/output_example"]
 
 # 2. Compute cell-type probability maps using transfer learning model (TCGA-SKCM)
 

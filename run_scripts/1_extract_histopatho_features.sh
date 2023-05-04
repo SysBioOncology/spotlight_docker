@@ -8,7 +8,6 @@
 # class_name = e.g. COAD_T (see codebook.txt)
 
 # Define type of slide (Fresh-Frozen [FF] vs Formalin-Fixed Paraffin-Embedded [FFPE])
-slide_type="FFPE"
 
 # General setup
 repo_dir=$(pwd)
@@ -21,8 +20,9 @@ echo "Folder output: $4";
 
 slides_dir=$1
 clinical_files_dir=$2                                                                           
-slide_type=$3 
-output_dir=$4
+checkpoint_path=$3
+slide_type=$4
+output_dir=$5
 
 # ---------------------------------- #
 # ---- create new clinical file ---- #
@@ -77,7 +77,6 @@ python $repo_dir/Python/1_extract_histopathological_features/pre_processing.py \
 
 # Compute predictions and bottlenecks features using the Retrained_Inception_v4 checkpoints
 model_name="inception_v4"
-checkpoint_path="/home/olapuent/Desktop/spatial_localization/repo_manuscript/spotlight/analysis/Retrained_Inception_v4/checkpoints/Retrained_Inception_v4.ckpt"
 python $repo_dir/Python/1_extract_histopathological_features/myslim/bottleneck_predict.py \
     --num_classes=42 \
     --bot_out=$output_dir/bot.train.txt \
