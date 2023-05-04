@@ -1,0 +1,2 @@
+slide_submitter_id	sample_submitter_id     image_file_name percent_tumor_cells     class_name      class_id
+example	example	example_slide.npi	XX      SKCM_T  41

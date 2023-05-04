@@ -1,0 +1,15 @@
+caffeine==0.5
+GitPython==3.1.30
+joblib==1.1.1
+matplotlib==3.6.2
+networkx==3.0
+numpy==1.24.1
+pandas==1.5.2
+Pillow==9.4.0
+scikit_learn==1.2.0
+scipy==1.10.0
+seaborn==0.12.2
+six==1.16.0
+tensorflow==2.11.0
+tf_slim==1.1.0
+openpyxl
