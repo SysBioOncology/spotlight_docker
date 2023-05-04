@@ -1,8 +1,8 @@
 # Spatial Profiling of Tumors by Leveraging Imaging and Transcriptomics (SPoTLIghT)
 
-<img align="left" width=100% src="https://github.com/joan-yanqiong/spotlight/blob/master/PipelineA.pdf">
-<img align="left" width=100% src="https://github.com/joan-yanqiong/spotlight/blob/master/PipelineB.pdf">
-<img align="left" width=100% src="https://github.com/joan-yanqiong/spotlight/blob/master/PipelineC.pdf">
+<img align="left" width=100% src="https://github.com/joan-yanqiong/spotlight/blob/master/PipelineA.png">
+<img align="left" width=100% src="https://github.com/joan-yanqiong/spotlight/blob/master/PipelineB.png">
+<img align="left" width=100% src="https://github.com/joan-yanqiong/spotlight/blob/master/PipelineC.png">
 
 First, build the docker image as follows:
 
