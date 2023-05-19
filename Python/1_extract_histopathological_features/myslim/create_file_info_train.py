@@ -2,11 +2,10 @@ import argparse
 import os
 import os.path
 import sys
-
 import pandas as pd
-import git
-REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
-sys.path.append(f"{REPO_DIR}/Python/libs")
+
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
+REPO_DIR = os.path.dirname(os.getcwd())
 
 # trunk-ignore(flake8/E402)
 import DL.utils as utils
@@ -14,21 +13,20 @@ import DL.utils as utils
 # trunk-ignore(flake8/E402)
 from openslide import OpenSlide
 
-
-def format_tile_data_structure(slides_folder, output_dir, clinical_file_path):
+def format_tile_data_structure(slides_folder, output_folder, clinical_file_path):
     """
     Specifying the tile data structure required to store tiles as TFRecord files (used in convert.py)
 
     Args:
         slides_folder (str): path pointing to folder with all whole slide images (.svs files)
-        output_dir (str): path pointing to folder for storing all created files by script
+        output_folder (str): path pointing to folder for storing all created files by script
         clinical_file_path (str): path pointing to formatted clinical file (either generated or manually formatted)
 
     Returns:
-        {output_dir}/file_info_train.txt containing the path to the individual tiles, class name, class id, percent of tumor cells and JPEG quality
+        {output_folder}/file_info_train.txt containing the path to the individual tiles, class name, class id, percent of tumor cells and JPEG quality
 
     """
-    tiles_folder = output_dir + "/tiles"
+    tiles_folder = output_folder + "/tiles"
 
     clinical_file = pd.read_csv(clinical_file_path, sep="\t")
     clinical_file.dropna(how="all", inplace=True)
@@ -59,7 +57,9 @@ def format_tile_data_structure(slides_folder, output_dir, clinical_file_path):
     # 4) Determine jpeg_quality of slides
     slide_quality = []
     for slide_name in jpg_tiles_df.image_file_name.unique():
+        print("{}/{}".format(slides_folder, slide_name))
         img = OpenSlide("{}/{}".format(slides_folder, slide_name))
+        print(img.properties.values)
         image_description = img.properties.values.__self__.get("tiff.ImageDescription").split("|")[0]
         image_description_split = image_description.split(" ")
         jpeg_quality = image_description_split[-1]
@@ -77,7 +77,7 @@ def format_tile_data_structure(slides_folder, output_dir, clinical_file_path):
     output = jpg_tiles_df[
         ["tile_path", "class_name", "class_id", "jpeg_quality", "percent_tumor_cells"]
     ]
-    output.to_csv(output_dir + "/file_info_train.txt", index=False, sep="\t")
+    output.to_csv(output_folder + "/file_info_train.txt", index=False, sep="\t")
 
     print("Finished creating the necessary file for training in the next step")
 
@@ -85,12 +85,12 @@ def format_tile_data_structure(slides_folder, output_dir, clinical_file_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--slides_folder", help="Set slides folder")
-    parser.add_argument("--output_dir", help="Set output folder")
+    parser.add_argument("--output_folder", help="Set output folder")
     parser.add_argument("--clin_path", help="Set clinical file path")
     args = parser.parse_args()
 
     format_tile_data_structure(
         slides_folder=args.slides_folder,
-        output_dir=args.output_dir,
+        output_folder=args.output_folder,
         clinical_file_path=args.clin_path,
     )

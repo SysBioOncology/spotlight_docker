@@ -6,20 +6,16 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-# ACTION only in WINDOWS
-import git
-REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
-os.add_dll_directory(f"{REPO_DIR}/Python/libs/openslide-win64-20171122/bin")
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
+REPO_DIR = os.path.dirname(os.getcwd())
 
 # trunk-ignore(flake8/E402)
 from openslide import OpenSlide
 
-sys.path.append(f"{REPO_DIR}/Python/libs")
 # trunk-ignore(flake8/E402)
 import DL.image as im
 
-
-def create_tiles_from_slides(slides_folder, output_dir, clinical_file_path):
+def create_tiles_from_slides(slides_folder, output_folder, clinical_file_path):
     """
     Create tiles from slides
     Dividing the whole slide images into tiles with a size of 512 x 512 pixels, with an overlap of 50 pixels at a magnification of 20x. In addition, remove blurred and non-informative tiles by using the weighted gradient magnitude.
@@ -29,15 +25,15 @@ def create_tiles_from_slides(slides_folder, output_dir, clinical_file_path):
 
     Args:
         slides_folder (str): path pointing to folder with all whole slide images (.svs files)
-        output_dir (str): path pointing to folder for storing all created files by script (i.e. .jpg files for the created tiles)
+        output_folder (str): path pointing to folder for storing all created files by script (i.e. .jpg files for the created tiles)
 
     Returns:
-        jpg files for the created tiles in the specified folder {output_dir}/tiles
+        jpg files for the created tiles in the specified folder {output_folder}/tiles
 
     """
 
     # Create folder for storing the tiles if non-existent
-    tiles_folder = "{}/tiles".format(output_dir)
+    tiles_folder = "{}/tiles".format(output_folder)
     if not os.path.exists(tiles_folder):
         os.makedirs(tiles_folder)
 
@@ -47,7 +43,7 @@ def create_tiles_from_slides(slides_folder, output_dir, clinical_file_path):
     clinical_file.drop_duplicates(inplace=True)
     clinical_file.drop_duplicates(subset="slide_submitter_id", inplace=True)
     subset_images=clinical_file.image_file_name.tolist()
-
+    print(subset_images)
     # Check if slides are among our data
     available_images=os.listdir(slides_folder)
     images_for_tiling=list(set(subset_images) & set(available_images))
@@ -55,7 +51,7 @@ def create_tiles_from_slides(slides_folder, output_dir, clinical_file_path):
     print(len(images_for_tiling), 'images available:')
     counter=1
     for slide_filename in images_for_tiling:
-            if slide_filename.endswith('.svs'):
+            if slide_filename.endswith(('.svs','.ndpi')):
                 print(counter, ':', slide_filename)
                 slide = OpenSlide("{}/{}".format(slides_folder, slide_filename))
                 slide_name = slide_filename.split(".")[0]

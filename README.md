@@ -14,9 +14,9 @@ Then, run the docker to execute the whole pipeline or execute separate steps as 
 
 ```bash
 docker run \                                                  
--v $(pwd)/spotlight_docker/data/checkpoint/Retrained_Inception_v4/:/data/checkpoint/Retrained_Inception_v4:ro \
--v $(pwd)/spotlight_docker/data_example/:/data_example:ro \
--v $(pwd)/spotlight_docker/output_example/:/output_example:rw \
+-v $(pwd)/data/checkpoint/Retrained_Inception_v4/:/data/checkpoint/Retrained_Inception_v4:ro \
+-v $(pwd)/data_example/:/data_example:ro \
+-v $(pwd)/output_example/:/output_example:rw \
 run_spotlight_example:v1
 ```
 

@@ -1,12 +1,12 @@
 import argparse
 import os
 import os.path
-import git
 import numpy as np
 import pandas as pd
 import sys
-REPO_DIR = git.Repo(os.getcwd(), search_parent_directories=True).working_tree_dir
-sys.path.append(f"{REPO_DIR}/Python/libs")
+
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
+REPO_DIR = os.path.dirname(os.getcwd())
 
 def create_TCGA_clinical_file(
     class_names,
@@ -32,7 +32,8 @@ def create_TCGA_clinical_file(
 
     """
     # ---- Setup parameters ---- #
-    full_output_dir = f"{output_dir}/1_histopathological_features"
+    full_output_dir = f"{REPO_DIR}/{output_dir}/1_histopathological_features"
+
     if output_dir is None:
         full_output_dir = f"{REPO_DIR}/output/1_extract_histopathological_features"
     if not os.path.isdir(full_output_dir):
@@ -59,6 +60,8 @@ def create_TCGA_clinical_file(
         clinical_file["class_id"] = int(
             CODEBOOK.loc[CODEBOOK["class_name"] == class_name].values[0][1]
         )
+        print(clinical_file)
+        print(CODEBOOK)
     # b) Multiple classes
     elif os.path.isdir(clinical_files_dir) & (len(class_names) > 1):
         clinical_file_list = []

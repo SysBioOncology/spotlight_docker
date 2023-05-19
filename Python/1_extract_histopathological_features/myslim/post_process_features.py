@@ -4,10 +4,9 @@ import os
 import sys
 import dask.dataframe as dd
 import pandas as pd
-import git
 
-REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
-sys.path.append(f"{REPO_DIR}/Python/libs")
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
+REPO_DIR = os.path.dirname(os.getcwd())
 
 # Custom imports
 import DL.utils as utils

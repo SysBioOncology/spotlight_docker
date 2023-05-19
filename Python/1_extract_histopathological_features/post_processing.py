@@ -1,6 +1,5 @@
 import argparse
 import os
-import git
 from myslim.post_process_features import post_process_features
 from myslim.post_process_predictions import post_process_predictions
 

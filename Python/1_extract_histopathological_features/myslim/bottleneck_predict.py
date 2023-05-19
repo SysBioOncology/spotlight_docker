@@ -4,7 +4,8 @@ import sys
 import time
 import tensorflow.compat.v1 as tf
 
-sys.path.append(os.getcwd())
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
+REPO_DIR = os.path.dirname(os.getcwd())
 
 # trunk-ignore(flake8/E402)
 import tf_slim as slim

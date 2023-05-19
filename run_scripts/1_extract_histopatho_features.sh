@@ -15,8 +15,9 @@ repo_dir=$(pwd)
 # ommand line rguments
 echo "Folder images: $1";
 echo "Folder clinical file: $2";
-echo "Slide type: $3";
-echo "Folder output: $4";
+echo "Model checkpoints: $3";
+echo "Slide type: $4";
+echo "Folder output: $5";
 
 slides_dir=$1
 clinical_files_dir=$2                                                                           
@@ -44,11 +45,11 @@ tumor_purity_threshold=80
 class_name=SKCM_T
 
 # Create a filtered clinical file based on thresholded tumor purity
-python $repo_dir/Python/1_extract_histopathological_features/myslim/create_clinical_file.py \
-   --class_names $class_name \
-   --clinical_files_folder $clinical_files_dir \
-   --output_dir $output_dir \
-   --tumor_purity_threshold=$tumor_purity_threshold # (OPTIONAL: by default 80)
+#python $repo_dir/Python/1_extract_histopathological_features/myslim/create_clinical_file.py \
+#   --class_names $class_name \
+#   --clinical_files_dir $clinical_files_dir \
+#   --output_dir $output_dir \
+#   --tumor_purity_threshold=$tumor_purity_threshold # (OPTIONAL: by default 80)
 
 # Formatted clinical file available at:
 ## FF
@@ -67,9 +68,9 @@ python $repo_dir/Python/1_extract_histopathological_features/myslim/create_clini
 # --------------------------------------------------------- #
 
 python $repo_dir/Python/1_extract_histopathological_features/pre_processing.py \
-    --slides_dir=$slides_dir \
-    --output_dir=$output_dir \
-    --clinical_file_path=$output_dir/generated_clinical_file.csv
+    --slides_folder=$slides_dir \
+    --output_folder=$output_dir \
+    --clinical_file_path=$clinical_files_dir/generated_clinical_file.txt
 
 # ------------------------------------------------------ #
 # ---- Compute predictions and bottlenecks features ---- #
