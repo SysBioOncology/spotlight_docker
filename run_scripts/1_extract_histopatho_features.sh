@@ -12,7 +12,7 @@
 # General setup
 repo_dir=$(pwd)
 
-# ommand line rguments
+# command line rguments
 echo "Folder images: $1";
 echo "Folder clinical file: $2";
 echo "Model checkpoints: $3";
@@ -67,10 +67,10 @@ class_name=SKCM_T
 # ---- image tiling and image conversion to TF records ---- #
 # --------------------------------------------------------- #
 
-python $repo_dir/Python/1_extract_histopathological_features/pre_processing.py \
-    --slides_folder=$slides_dir \
-    --output_folder=$output_dir \
-    --clinical_file_path=$clinical_files_dir/generated_clinical_file.txt
+#python $repo_dir/Python/1_extract_histopathological_features/pre_processing.py \
+#    --slides_folder=$slides_dir \
+#    --output_folder=$output_dir \
+#    --clinical_file_path=$clinical_files_dir/generated_clinical_file.txt
 
 # ------------------------------------------------------ #
 # ---- Compute predictions and bottlenecks features ---- #
@@ -78,12 +78,13 @@ python $repo_dir/Python/1_extract_histopathological_features/pre_processing.py \
 
 # Compute predictions and bottlenecks features using the Retrained_Inception_v4 checkpoints
 model_name="inception_v4"
-python $repo_dir/Python/1_extract_histopathological_features/myslim/bottleneck_predict.py \
-    --num_classes=42 \
-    --bot_out=$output_dir/bot.train.txt \
-    --pred_out=$output_dir/pred.train.txt \
-    --model_name=$model_name \
-    --checkpoint_path=$checkpoint_path \
+#python $repo_dir/Python/1_extract_histopathological_features/myslim/bottleneck_predict.py \
+#    --num_classes=42 \
+#    --bot_out=$output_dir/bot_train.txt \
+#    --pred_out=$output_dir/pred_train.txt \
+#    --model_name=$model_name \
+#    --checkpoint_path=$checkpoint_path \
+#    --file_dir=$output_dir/process_train
 
 # ----------------------------------------------------- #
 # ---- Post-processing of predictions and futures ----- #

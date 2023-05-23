@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument("--slide_type", help="Type of tissue slide (FF or FFPE)", required=True, type=str)
     args = parser.parse_args()
 
-    full_output_dir = f"{args.output_dir}/1_histopathological_features"
+    full_output_dir = f"{args.output_dir}"
     if not os.path.exists(args.output_dir):
         output_dir = full_output_dir
 

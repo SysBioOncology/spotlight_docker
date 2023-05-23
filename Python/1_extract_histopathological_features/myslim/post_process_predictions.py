@@ -5,11 +5,6 @@ import sys
 import dask.dataframe as dd
 import pandas as pd
 
-# WINDOWS
-# import git
-#REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
-#sys.path.append(f"{REPO_DIR}\\Python\\libs")
-
 # Point to folder with custom imports
 sys.path.append(f"{os.path.dirname(os.getcwd())}/libs")
 
@@ -39,15 +34,15 @@ def post_process_predictions(output_dir, slide_type):
     """
 
     # Initialize
-    path_codebook = f"{os.path.dirname(os.getcwd())}/1_extract_histopathological_features/codebook.txt"
-    path_tissue_classes = f"{os.path.dirname(os.getcwd())}/1_extract_histopathological_features/tissue_classes.csv"
+    path_codebook = f"{os.path.dirname(os.getcwd())}/Python/1_extract_histopathological_features/codebook.txt"
+    path_tissue_classes = f"{os.path.dirname(os.getcwd())}/Python/1_extract_histopathological_features/tissue_classes.csv"
     codebook = pd.read_csv(path_codebook, delim_whitespace=True, header=None)
     codebook.columns = ["class_name", "class_id"]
     tissue_classes = pd.read_csv(path_tissue_classes, sep="\t")
 
     # Read predictions
     if slide_type == "FF":
-        predictions_raw = pd.read_csv(output_dir + "/pred.train.txt", sep="\t", header=None)
+        predictions_raw = pd.read_csv(output_dir + "/pred_train.txt", sep="\t", header=None)
         ## Extract tile name incl. coordinates from path
         tile_names = [utils.get_tile_name(tile_path) for tile_path in predictions_raw[0]]
         ## Create output dataframe for post-processed data
@@ -125,10 +120,10 @@ def post_process_predictions(output_dir, slide_type):
         predictions.to_csv(output_dir + "/predictions.txt", sep="\t")
 
     elif slide_type== "FFPE":
-        predictions_raw = dd.read_csv(output_dir + "/pred.train.txt", sep = "\t", header=None)
+        predictions_raw = dd.read_csv(output_dir + "/pred_train.txt", sep = "\t", header=None)
         predictions_raw['tile_ID'] = predictions_raw.iloc[:,0].str[104:180]
         predictions_raw['tile_ID'] = predictions_raw['tile_ID'].str.replace(".jpg'","")
-        predictions = predictions.map_partitions(lambda df: df.drop(columns=[0,1]))
+        predictions = predictions_raw.map_partitions(lambda df: df.drop(columns=[0,1]))
         new_names=list(map(lambda x: str(x), codebook["class_id"]))
         new_names.append('tile_ID')
         predictions.columns = new_names

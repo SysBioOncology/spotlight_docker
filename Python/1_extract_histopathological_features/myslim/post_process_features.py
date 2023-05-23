@@ -6,7 +6,6 @@ import dask.dataframe as dd
 import pandas as pd
 
 sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
-REPO_DIR = os.path.dirname(os.getcwd())
 
 # Custom imports
 import DL.utils as utils
@@ -23,7 +22,7 @@ def post_process_features(output_dir, slide_type):
 	"""
 	# Read histopathological computed features
 	if slide_type == "FF":
-		features_raw = pd.read_csv(output_dir + "/bot.train.txt", sep="\t", header=None)
+		features_raw = pd.read_csv(output_dir + "/bot_train.txt", sep="\t", header=None)
 		## Extract the DL features (discard: col1 = tile paths, col2 = true class id)
 		features = features_raw.iloc[:, 2:]
 		features.columns = list(range(1536))
@@ -35,7 +34,7 @@ def post_process_features(output_dir, slide_type):
 		features.to_csv(output_dir + "/features.txt", sep="\t", header=True)
 
 	elif slide_type == "FFPE":
-		features_raw = dd.read_csv(output_dir + "/bot.train.txt", sep = "\t", header=None)
+		features_raw = dd.read_csv(output_dir + "/bot_train.txt", sep = "\t", header=None)
 		features_raw['tile_ID'] = features_raw.iloc[:,0].str[104:180]
 		features_raw['tile_ID'] = features_raw['tile_ID'].str.replace(".jpg'","")
 		features = features_raw.map_partitions(lambda df: df.drop(columns=[0,1]))

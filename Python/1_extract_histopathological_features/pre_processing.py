@@ -50,7 +50,7 @@ def execute_preprocessing(slides_folder, output_folder, clinical_file_path, N_sh
     )
 
     # Convert tiles from jpg to TF record1
-    file_info = pd.read_csv(f"{output_folder}/file_info_train.txt", sep="\t")
+    file_info = pd.read_csv(f"{output_folder}/1_histopathological_features/file_info_train.txt", sep="\t")
     training_filenames = list(file_info["tile_path"].values)
     training_classids = [int(id) for id in list(file_info["class_id"].values)]
     tps = [int(id) for id in list(file_info["percent_tumor_cells"].values)]

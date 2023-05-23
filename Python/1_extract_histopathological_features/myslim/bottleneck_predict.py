@@ -4,8 +4,7 @@ import sys
 import time
 import tensorflow.compat.v1 as tf
 
-sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
-REPO_DIR = os.path.dirname(os.getcwd())
+sys.path.append(os.getcwd())
 
 # trunk-ignore(flake8/E402)
 import tf_slim as slim
@@ -20,10 +19,10 @@ tf.compat.v1.disable_eager_execution()
 
 tf.app.flags.DEFINE_integer("num_classes", 42, "The number of classes.")
 tf.app.flags.DEFINE_string(
-    "bot_out", "../Output/bot.train.txt", "Output file for bottleneck features."
+    "bot_out", "../Output/bot_train.txt", "Output file for bottleneck features."
 )
 tf.app.flags.DEFINE_string(
-    "pred_out", "../Output/pred.train.txt", "Output file for predictions."
+    "pred_out", "../Output/pred_train.txt", "Output file for predictions."
 )
 tf.app.flags.DEFINE_string(
     "model_name", "inception_v4", "The name of the architecture to evaluate."
@@ -32,9 +31,8 @@ tf.app.flags.DEFINE_string(
     "checkpoint_path", None, "The directory where the model was written to."
 )
 tf.app.flags.DEFINE_integer("eval_image_size", 299, "Eval image size.")
-tf.app.flags.DEFINE_string("filedir", "../Output/process_train/", "")
+tf.app.flags.DEFINE_string("file_dir", "../Output/process_train/", "")
 FLAGS = tf.app.flags.FLAGS
-
 
 def main(_):
     model_name_to_variables = {
@@ -52,9 +50,9 @@ def main(_):
     if model_variables is None:
         tf.logging.error("Unknown model_name provided `%s`." % FLAGS.model_name)
         sys.exit(-1)
-
     if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
         checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
+        print(checkpoint_path)
         if checkpoint_path is None:
             sys.exit(-1)
     else:
@@ -84,10 +82,10 @@ def main(_):
     fto_bot = open(FLAGS.bot_out, "w")
     fto_pred = open(FLAGS.pred_out, "w")
 
-    filelist = os.listdir(FLAGS.filedir)
+    filelist = os.listdir(FLAGS.file_dir)
     for i in range(len(filelist)):
         file = filelist[i]
-        fls = tf.python_io.tf_record_iterator(FLAGS.filedir + "/" + file)
+        fls = tf.python_io.tf_record_iterator(FLAGS.file_dir + "/" + file)
         tf.logging.info("reading from: %s" % file)
         start_time = time.time()
         c = 0

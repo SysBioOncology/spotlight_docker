@@ -59,10 +59,11 @@ def format_tile_data_structure(slides_folder, output_folder, clinical_file_path)
     for slide_name in jpg_tiles_df.image_file_name.unique():
         print("{}/{}".format(slides_folder, slide_name))
         img = OpenSlide("{}/{}".format(slides_folder, slide_name))
-        print(img.properties.values)
-        image_description = img.properties.values.__self__.get("tiff.ImageDescription").split("|")[0]
-        image_description_split = image_description.split(" ")
-        jpeg_quality = image_description_split[-1]
+        #print(img.properties.values)
+        #image_description = img.properties.values.__self__.get("tiff.ImageDescription").split("|")[0]
+        #image_description_split = image_description.split(" ")
+        #jpeg_quality = image_description_split[-1]
+        jpeg_quality = "80"
         slide_quality.append([slide_name, "RGB" + jpeg_quality])
 
     slide_quality_df = pd.DataFrame(
@@ -79,7 +80,7 @@ def format_tile_data_structure(slides_folder, output_folder, clinical_file_path)
     ]
     output.to_csv(output_folder + "/file_info_train.txt", index=False, sep="\t")
 
-    print("Finished creating the necessary file for training in the next step")
+    print("Finished creating the necessary file for computing the features in the next step")
 
 
 if __name__ == "__main__":
