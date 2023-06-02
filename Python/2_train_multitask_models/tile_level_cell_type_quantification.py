@@ -7,7 +7,6 @@ import joblib
 import scipy.stats as stats
 
 sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
-REPO_DIR = os.path.dirname(os.getcwd())
 
 from model.constants import DEFAULT_CELL_TYPES
 from model.evaluate import compute_tile_predictions
@@ -36,15 +35,20 @@ def tile_level_quantification(models_dir, output_dir, var_names_path, histopatho
     else:
         cell_types = DEFAULT_CELL_TYPES
 
+    print(cell_types)
+
     full_output_dir = f"{output_dir}/2_tile_level_quantification"
+    print(full_output_dir) 
     if not os.path.isdir(full_output_dir):
         os.makedirs(full_output_dir)
 
     var_names = joblib.load(var_names_path)
+    print(var_names)
 
     if slide_type == "FF":
         histopatho_features = pd.read_csv(histopatho_features_path, sep="\t", index_col=0)
     elif slide_type == "FFPE":
+        print(histopatho_features_path)
         histopatho_features = dd.read_parquet(histopatho_features_path)
 
     print(histopatho_features.head())
@@ -53,7 +57,10 @@ def tile_level_quantification(models_dir, output_dir, var_names_path, histopatho
     tile_predictions = pd.DataFrame()
     bottleneck_features = histopatho_features.loc[:,  [str(i) for i in range(1536)]]
     bottleneck_features.index = histopatho_features.tile_ID
-    metadata = histopatho_features.loc[:, var_names["IDs"] + var_names["tile_IDs"]]
+    var_names['IDs'] = 'sample_submitter_id'
+    var_names['tile_IDs'] = ['Coord_X', 'Coord_Y', 'tile_ID']
+    var_names['tile_IDs'].append(var_names['IDs'])
+    metadata = histopatho_features.loc[:, var_names["tile_IDs"]]
     if slide_type == "FFPE":
         metadata = metadata.compute()
 
@@ -95,6 +102,8 @@ def tile_level_quantification(models_dir, output_dir, var_names_path, histopatho
             )
             tile_predictions = pd.concat([tile_predictions, cell_type_tile_predictions], axis=1)
 
+    print(tile_predictions.shape)
+
     # Remove slides with nan values
     tile_predictions = tile_predictions.dropna()
 
@@ -107,9 +116,7 @@ def tile_level_quantification(models_dir, output_dir, var_names_path, histopatho
     feature_names = tile_predictions.columns
     pred_proba = pd.DataFrame(data=stats.norm.cdf(tile_predictions), columns=feature_names, index=tile_predictions.index)
     pred_proba = pd.concat([pred_proba, metadata], axis=1)
-
-    tile_predictions["patient_ID"] = tile_predictions.tile_ID.str[0:12]
-
+   
     # Remove suffix '(combi)'
     pred_proba.columns = [col.replace(" (combi)", "") for col in pred_proba.columns]
     tile_predictions.columns = [col.replace(" (combi)", "") for col in tile_predictions.columns]

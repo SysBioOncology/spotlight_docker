@@ -35,15 +35,17 @@ def post_process_features(output_dir, slide_type):
 
 	elif slide_type == "FFPE":
 		features_raw = dd.read_csv(output_dir + "/bot_train.txt", sep = "\t", header=None)
-		features_raw['tile_ID'] = features_raw.iloc[:,0].str[104:180]
+		features_raw['tile_ID'] = features_raw.iloc[:,0]
+		features_raw.tile_ID=features_raw.tile_ID.map(lambda x: x.split("/")[-1])
 		features_raw['tile_ID'] = features_raw['tile_ID'].str.replace(".jpg'","")
 		features = features_raw.map_partitions(lambda df: df.drop(columns=[0,1]))
 		new_names=list(map(lambda x: str(x), list(range(1536))))
 		new_names.append('tile_ID')
 		features.columns = new_names
-		features["sample_submitter_id"] = features["tile_ID"].str[0:16]
-		features["slide_submitter_id"] = features["tile_ID"].str[0:23]
-		features["Section"] = features["tile_ID"].str[20:23]
+		#features["sample_submitter_id"] = features["tile_ID"].str[0:16] # just TCGA
+		features["sample_submitter_id"] = features['tile_ID'].str.split('_').str[0]
+		#features["slide_submitter_id"] = features["tile_ID"].str[0:23] # just TCGA
+		#features["Section"] = features["tile_ID"].str[20:23] # just TCGA
 		features['Coord_X'] = features['tile_ID'].str.split('_').str[1]
 		features['Coord_Y'] = features['tile_ID'].str.split('_').str[-1]
 		## Save features using parquet

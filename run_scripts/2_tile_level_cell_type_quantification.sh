@@ -4,7 +4,6 @@
 ## Compute cell-type quantification from transfer learning models  ##
 #####################################################################
 
-
 # ----------------------------------- #
 # --------- Setup file paths -------- #
 # ----------------------------------- #
@@ -26,21 +25,29 @@ slide_type=$2
 # Define output directory
 output_dir=$3
 
-# Transfer Learning trained models directory
-models_dir=$repo_dir/data/TF_models/SKCM_${slide_type}
+# Transfer Learning trained models directory (default: use of FF here)
+models_dir=/data/TF_models/SKCM_FF
+
+echo $models_dir
 
 # Histopathological features
 if [[ $slide_type == "FF" ]];then
-    histopatho_features_path=$output_dir/features.txt
+    histopatho_features_path=$features_dir
 elif [[ $slide_type == "FFPE" ]];then
-    histopatho_features_path=$output_dir/features_format_parquet/
+    histopatho_features_path=$features_dir
 fi
 
+echo $histopatho_features_path
+
 # Task signatures
-var_names_path=$repo_dir/Python/2_train_multitask_models/task_selection_names.pkl
+var_names_path=/Python/2_train_multitask_models/task_selection_names.pkl
+
+echo $var_names_path
 
 # Compute predictions using models learned from unseen folds
 prediction_mode="test" # (tcga_validation, tcga_train_validation)
+
+echo $prediction_mode
 
 # ---------------------------------------------------- #
 # ---- Predict cell type abundances on tile level ---- #
@@ -48,7 +55,7 @@ prediction_mode="test" # (tcga_validation, tcga_train_validation)
 
 # For now, we use models trained on FF slides
 
-python $repo_dir/Python/2_train_multitask_models/tile_level_cell_type_quantification.py \
+python /Python/2_train_multitask_models/tile_level_cell_type_quantification.py \
     --models_dir=$models_dir \
     --output_dir=$output_dir \
     --histopatho_features_path=$histopatho_features_path \

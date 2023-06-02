@@ -29,7 +29,7 @@ COPY run_scripts/ run_scripts
 
 # 1. Extract 1,536 histopathological features computed using PC-CHiP from Fu et al.
 
-# CMD ["bash", "/run_scripts/1_extract_histopatho_features.sh", "/data_example/images", "/data_example", "/data/checkpoint/Retrained_Inception_v4/model.ckpt-100000" ,"FFPE", "/output_example"]
+# CMD ["bash", "/run_scripts/1_extract_histopatho_features.sh", "/data_example/images", "/data/checkpoint/Retrained_Inception_v4/model.ckpt-100000" ,"FFPE", "/output_example"]
 
 # 2. Compute cell-type probability maps using transfer learning model (TCGA-SKCM)
 

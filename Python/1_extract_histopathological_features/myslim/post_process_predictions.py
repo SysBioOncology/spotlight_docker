@@ -121,7 +121,8 @@ def post_process_predictions(output_dir, slide_type):
 
     elif slide_type== "FFPE":
         predictions_raw = dd.read_csv(output_dir + "/pred_train.txt", sep = "\t", header=None)
-        predictions_raw['tile_ID'] = predictions_raw.iloc[:,0].str[104:180]
+        predictions_raw['tile_ID'] = predictions_raw.iloc[:,0]
+        predictions_raw.tile_ID=predictions_raw.tile_ID.map(lambda x: x.split("/")[-1])
         predictions_raw['tile_ID'] = predictions_raw['tile_ID'].str.replace(".jpg'","")
         predictions = predictions_raw.map_partitions(lambda df: df.drop(columns=[0,1]))
         new_names=list(map(lambda x: str(x), codebook["class_id"]))

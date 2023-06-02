@@ -14,54 +14,23 @@ repo_dir=$(pwd)
 
 # command line rguments
 echo "Folder images: $1";
-echo "Folder clinical file: $2";
-echo "Model checkpoints: $3";
-echo "Slide type: $4";
-echo "Folder output: $5";
+echo "Model checkpoints: $2";
+echo "Slide type: $3";
+echo "Folder output: $4";
 
 slides_dir=$1
-clinical_files_dir=$2                                                                           
-checkpoint_path=$3
-slide_type=$4
-output_dir=$5
+clinical_file=/data/clinical_file/tmp_clinical_file.txt       
+checkpoint_path=$2
+slide_type=$3
+output_dir=$4
 
 # ---------------------------------- #
 # ---- create new clinical file ---- #
 # ---------------------------------- #
 
-########################
-## For TCGA datasets: ##
-########################
-
-# Multi-class: e.g. LUAD and LUSC
-# - clinical_files_folder: Directory expected to be in this format: {clinical_files_dir}/clinical_file_TCGA_{cancer_type}.tsv
-# - class_names: txt or csv file with on each line a class name (TCGA abbreviation)
-
-# Single-class: e.g. SKCM
-# - clinical_files_folder: Give the full path to the clinical file
-# - class_names: Give single the class name (TCGA abbreviation)
-
-tumor_purity_threshold=80
-class_name=SKCM_T
-
-# Create a filtered clinical file based on thresholded tumor purity
-#python $repo_dir/Python/1_extract_histopathological_features/myslim/create_clinical_file.py \
-#   --class_names $class_name \
-#   --clinical_files_dir $clinical_files_dir \
-#   --output_dir $output_dir \
-#   --tumor_purity_threshold=$tumor_purity_threshold # (OPTIONAL: by default 80)
-
-# Formatted clinical file available at:
-## FF
-#clin_file_path="/home/olapuent/Desktop/spatial_localization/repo_manuscript/spotlight/analysis/SKCM_FF/output/generated_clinical_file.txt"
-## FFPE (made based on FF generated clinical file, so all slides passed the filtering)
-# clin_file_path="/home/olapuent/Desktop/spatial_localization/repo_manuscript/spotlight/analysis/SKCM_FFPE/output/FFPE_generated_clinical_file.txt"
-
-########################
-## Any other datasets: ##
-########################
-
-# TODO: add code for other datasets
+#slides=$(ls $slides_dir)
+#n_slides=$(ls $slides_dir | wc -l)
+#awk -v var="$slides" -v var2="$n_slides" -v a=81 -v b="SKCM_T" -v c=41 -v OFS='\t' 'NR==1{print};NR>1 && NR<=var2{split(var, tmp, "."); print tmp[1], tmp[1], var, a, b, c}' $clinical_file
 
 # --------------------------------------------------------- #
 # ---- image tiling and image conversion to TF records ---- #

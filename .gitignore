@@ -1,3 +1,6 @@
 data/
 data_example/images/
 output_example/
+Python/libs/model/__pycache__/
+test_requirements.txt
+docker_test

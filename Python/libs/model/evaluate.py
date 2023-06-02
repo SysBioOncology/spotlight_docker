@@ -103,6 +103,7 @@ def compute_tile_predictions(
     index_pred = dict.fromkeys(range(n_outerfolds))
 
     for i in range(n_outerfolds):
+        print("fold ", i)
         # extract best model and scalers
         outer_model = outer_models[i]
         if any([prediction_mode == item for item in ['tcga_train_validation', 'test']]):
