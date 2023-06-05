@@ -1,6 +1,6 @@
 # Spatial Profiling of Tumors by Leveraging Imaging and Transcriptomics (SPoTLIghT)
 
-<img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineA.jpg">
+![](PipelineA.jpg)
 <img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineB.jpg">
 <img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineC.jpg">
 
