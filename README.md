@@ -1,8 +1,8 @@
 # Spatial Profiling of Tumors by Leveraging Imaging and Transcriptomics (SPoTLIghT)
 
-<img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineA.pdf">
-<img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineB.pdf">
-<img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineC.pdf">
+<img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineA.jpg">
+<img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineB.jpg">
+<img align="left" width=100% src="https://github.com/olapuentesantana/spotlight_docker/blob/main/PipelineC.jpg">
 
 First, build the docker image as follows:
 
