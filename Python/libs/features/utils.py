@@ -2,12 +2,12 @@ import pandas as pd
 import scipy.stats as stats
 import itertools
 import sys
-import git
+import os
 from scipy.stats import pearsonr, spearmanr
 import numpy as np
 
-REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
-sys.path.append(f"{REPO_DIR}/Python/libs")
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
+
 # Own modules
 from model.constants import *
 

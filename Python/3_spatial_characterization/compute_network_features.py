@@ -1,31 +1,22 @@
 import multiprocessing
 import sys
-import git
 import argparse
 import joblib
 from joblib import Parallel, delayed
 import pandas as pd
 
-REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
-sys.path.append(f"{REPO_DIR}/Python/libs")
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
 
 import features.features as features # trunk-ignore(flake8/E402)
 import features.graphs as graphs # trunk-ignore(flake8/E402)
 import features.utils as utils # trunk-ignore(flake8/E402)
 def compute_network_features(tile_quantification_path, output_dir, slide_type="FF", cell_types=None, graphs_path=None):
     NUM_CORES = multiprocessing.cpu_count()
-    METADATA_COLS = ['tile_ID',  'slide_submitter_id', 'Section',
-                    'Coord_X', 'Coord_Y', 'TCGA_patient_ID', 'MFP']
 
     if cell_types is None:
         cell_types = ["CAFs", "T_cells", "endothelial_cells", "tumor_purity"]
 
     predictions = pd.read_csv(tile_quantification_path, sep="\t", index_col=0)
-    predictions = predictions[cell_types + METADATA_COLS]
-    predictions = predictions.dropna(subset="MFP", axis=0)
-
-    slides = (
-        predictions[["MFP", "slide_submitter_id"]].drop_duplicates().reset_index(drop=True))
 
     #####################################
     # ---- Constructing the graphs ---- #

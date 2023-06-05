@@ -16,7 +16,9 @@ Then, run the docker to execute the whole pipeline or execute separate steps as 
 docker run \                                                  
 -v $(pwd)/data/:/data:ro \
 -v $(pwd)/data_example/:/data_example:ro \
--v $(pwd)/output_example/:/output_example:rw \
+-v $(pwd)/output_example/1_histopathological_features:/output_example/1_histopathological_features:rw \
+-v $(pwd)/output_example/2_tile_level_quantification:/output_example/2_tile_level_quantification:rw \
+-v $(pwd)/output_example/3_spatial_features:/output_example/3_spatial_features:rw \
 run_spotlight_example:v1
 ```
 

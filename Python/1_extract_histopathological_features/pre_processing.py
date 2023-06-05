@@ -30,9 +30,6 @@ def execute_preprocessing(slides_folder, output_folder, clinical_file_path, N_sh
         {output_folder}/process_train/{TFrecord file} files that store the data as a series of binary sequencies
 
     """
-    full_output_path=f"{output_folder}/1_histopathological_features"
-    if not os.path.exists(full_output_path):
-        os.makedirs(full_output_path)
 
     # Create an empty folder for TF records if folder doesn't exist
     process_train_dir = f"{output_folder}/process_train"

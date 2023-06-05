@@ -27,15 +27,15 @@ COPY run_scripts/ run_scripts
 # Run spotlight:
 # ------------- #
 
-# 1. Extract 1,536 histopathological features computed using PC-CHiP from Fu et al.
+# 1. Extract 1,536 histopathological features computed using PC-CHiP from Fu et al. (arguments: slide_images_folder, model_retrained_fu, slide_type, output folder)
 
 # CMD ["bash", "/run_scripts/1_extract_histopatho_features.sh", "/data_example/images", "/data/checkpoint/Retrained_Inception_v4/model.ckpt-100000" ,"FFPE", "/output_example"]
 
-# 2. Compute cell-type probability maps using transfer learning model (TCGA-SKCM)
+# 2. Compute cell-type probability maps using transfer learning model (TCGA-SKCM) (arguments: bottleneck_features_folder, slide_type, output folder)
 
-CMD ["bash", "/run_scripts/2_tile_level_cell_type_quantification.sh", "/output_example/features_format_parquet", "FFPE", "/output_example"]
+# CMD ["bash", "/run_scripts/2_tile_level_cell_type_quantification.sh", "/output_example/1_histopathological_features/features_format_parquet", "FFPE", "/output_example"]
 
-# 3. Compute spatial graph-based interpretable features
+# 3. Compute spatial graph-based interpretable features (arguments: celltype_tile_quantifications, slide_type, output folder)
 
-# CMD ["bash", "run_scripts/3_compute_spatial_features.sh", "path.to.tile.quant", "path.to.output"]
+CMD ["bash", "run_scripts/3_compute_spatial_features.sh", "output_example/2_tile_level_quantification/test_tile_predictions_proba.csv", "FFPE", "/output_example"]
 

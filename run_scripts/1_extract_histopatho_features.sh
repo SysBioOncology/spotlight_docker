@@ -38,7 +38,7 @@ output_dir=$4
 
 #python $repo_dir/Python/1_extract_histopathological_features/pre_processing.py \
 #    --slides_folder=$slides_dir \
-#    --output_folder=$output_dir \
+#    --output_folder=$output_dir/1_histopathological_features \
 #    --clinical_file_path=$clinical_files_dir/generated_clinical_file.txt
 
 # ------------------------------------------------------ #
@@ -49,11 +49,11 @@ output_dir=$4
 model_name="inception_v4"
 #python $repo_dir/Python/1_extract_histopathological_features/myslim/bottleneck_predict.py \
 #    --num_classes=42 \
-#    --bot_out=$output_dir/bot_train.txt \
-#    --pred_out=$output_dir/pred_train.txt \
+#    --bot_out=$output_dir/1_histopathological_features\bot_train.txt \
+#    --pred_out=$output_dir/1_histopathological_features\pred_train.txt \
 #    --model_name=$model_name \
 #    --checkpoint_path=$checkpoint_path \
-#    --file_dir=$output_dir/process_train
+#    --file_dir=$output_dir/1_histopathological_features/process_train
 
 # ----------------------------------------------------- #
 # ---- Post-processing of predictions and futures ----- #
@@ -64,7 +64,7 @@ model_name="inception_v4"
 
 ## FFPE
 python $repo_dir/Python/1_extract_histopathological_features/post_processing.py \
-    --output_dir=$output_dir \
+    --output_dir=$output_dir/1_histopathological_features \
     --slide_type=$slide_type
 
 # outputs two files: $output_dir/features $output_dir/predictions

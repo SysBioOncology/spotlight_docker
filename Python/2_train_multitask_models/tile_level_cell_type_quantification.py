@@ -121,6 +121,10 @@ def tile_level_quantification(models_dir, output_dir, var_names_path, histopatho
     pred_proba.columns = [col.replace(" (combi)", "") for col in pred_proba.columns]
     tile_predictions.columns = [col.replace(" (combi)", "") for col in tile_predictions.columns]
 
+    # Change columnsynta" "sample" for "slide"
+    tile_predictions = tile_predictions.rename(columns={'sample_submitter_id':'slide_submitter_id'})    
+    pred_proba = pred_proba.rename(columns={'sample_submitter_id':'slide_submitter_id'})
+
     tile_predictions.to_csv(f"{full_output_dir}/{prediction_mode}_tile_predictions_zscores.csv", sep="\t", index=False)
     pred_proba.to_csv(f"{full_output_dir}/{prediction_mode}_tile_predictions_proba.csv", sep="\t", index=False)
 

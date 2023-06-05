@@ -5,12 +5,8 @@ import pandas as pd
 from joblib import Parallel, delayed
 import argparse
 from os import path
-import git
 
-# Point to folder with custom imports
-#Â Point to folder with custom imports
-REPO_DIR = git.Repo(os.getcwd(), search_parent_directories=True).working_tree_dir
-sys.path.append(f"{REPO_DIR}/Python/libs")
+sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
 
 # Own modules
 import features.clustering as clustering
@@ -46,14 +42,10 @@ abundance_threshold=0.5, shapiro_alpha=0.05, cutoff_path_length=2):
         all_dual_nodes_frac (DataFrame): dataframe containing slide_submitter_id, pair, counts (absolute) and frac
 
     """
-    full_output_dir = f"{output_dir}/4_spatial_features"
-    if not path.exists(full_output_dir):
-        os.mkdir(full_output_dir)
     if cell_types is None:
         cell_types = DEFAULT_CELL_TYPES
 
     predictions = pd.read_csv(tile_quantification_path, sep="\t")
-    predictions = predictions[cell_types + METADATA_COLS]
     slide_submitter_ids = list(set(predictions.slide_submitter_id))
 
     #####################################
@@ -107,7 +99,7 @@ abundance_threshold=0.5, shapiro_alpha=0.05, cutoff_path_length=2):
         for id in slide_submitter_ids
     )
     # Formatting and count the number of shortest paths with max length
-    all_shortest_paths_thresholded = pd.concat(results, axis=0)
+Ã    all_shortest_paths_thresholded = pd.concat(results, axis=0)
     all_shortest_paths_thresholded["n_paths"] = 1
     proximity_graphs = (
         all_shortest_paths_thresholded.groupby(
@@ -141,10 +133,10 @@ abundance_threshold=0.5, shapiro_alpha=0.05, cutoff_path_length=2):
     all_features = pd.merge(all_features, colocalization_wide)
 
     # ---- Save to file ---- #
-    all_largest_cc_sizes_wide.to_csv(f"{full_output_dir}/{slide_type}_features_lcc_fraction.csv", sep="\t", index=False)
-    proximity_graphs.to_csv(f"{full_output_dir}/{slide_type}_features_shortest_paths_thresholded.csv", sep="\t", index=False)
-    all_dual_nodes_frac.to_csv(f"{full_output_dir}/{slide_type}_features_coloc_fraction.csv", sep="\t", index=False)
-    all_features.to_csv(f"{full_output_dir}/{slide_type}_all_graph_features.csv", sep="\t", index=False)
+    all_largest_cc_sizes_wide.to_csv(f"{output_dir}/{slide_type}_features_lcc_fraction.csv", sep="\t", index=False)
+    proximity_graphs.to_csv(f"{output_dir}/{slide_type}_features_shortest_paths_thresholded.csv", sep="\t", index=False)
+    all_dual_nodes_frac.to_csv(f"{output_dir}/{slide_type}_features_coloc_fraction.csv", sep="\t", index=False)
+    all_features.to_csv(f"{output_dir}/{slide_type}_all_graph_features.csv", sep="\t", index=False)
 
     ###############################################
     # ---- Compute ES based on ND difference ---- #
@@ -179,20 +171,20 @@ abundance_threshold=0.5, shapiro_alpha=0.05, cutoff_path_length=2):
 
     # ---- Save to file ---- #
     all_effect_sizes.to_csv(
-        f"{full_output_dir}/{slide_type}_features_ND_ES.csv", sep="\t", index=False)
+        f"{output_dir}/{slide_type}_features_ND_ES.csv", sep="\t", index=False)
     all_sims_nd.to_csv(
-        f"{full_output_dir}/{slide_type}_features_ND_sims.csv", sep="\t", index=False)
+        f"{output_dir}/{slide_type}_features_ND_sims.csv", sep="\t", index=False)
     all_mean_nd_df.to_csv(
-        f"{full_output_dir}/{slide_type}_features_ND.csv", sep="\t", index=False)
+        f"{output_dir}/{slide_type}_features_ND.csv", sep="\t", index=False)
     joblib.dump(example_simulations,
-        f"{full_output_dir}/{slide_type}_features_ND_sim_assignments.pkl")
-    all_shapiro_tests.to_csv(f"{full_output_dir}/{slide_type}_shapiro_tests.csv", index=False, sep="\t")
+        f"{output_dir}/{slide_type}_features_ND_sim_assignments.pkl")
+    all_shapiro_tests.to_csv(f"{output_dir}/{slide_type}_shapiro_tests.csv", index=False, sep="\t")
 
 def compute_clustering_features(
     tile_quantification_path, output_dir, slide_type=DEFAULT_SLIDE_TYPE, cell_types=None, graphs_path=None, n_clusters=8, max_dist=None, max_n_tiles_threshold=2, tile_size=512, overlap=50):
-    full_output_dir = f"{output_dir}/4_spatial_features"
-    if not path.exists(full_output_dir):
-        os.mkdir(full_output_dir)
+    output_dir = f"{output_dir}/4_spatial_features"
+    if not path.exists(output_dir):
+        os.mkdir(output_dir)
     if cell_types is None:
         cell_types = DEFAULT_CELL_TYPES
 
@@ -216,7 +208,7 @@ def compute_clustering_features(
             for slide_graph in results
         }
         joblib.dump(
-            all_graphs, f"{full_output_dir}/{slide_type}_graphs.pkl")
+            all_graphs, f"{output_dir}/{slide_type}_graphs.pkl")
     else:
         all_graphs = joblib.load(graphs_path)
 
@@ -411,17 +403,17 @@ def compute_clustering_features(
     # all_prox_df (DataFrame): dataframe containing slide_submitter_id, pair, proximity
     # prox_indiv_schc_combined (DataFrame): dataframe containing slide_submitter_id, comparison (high/low abundance label), pair (cell type pair) and proximity
     # shape_features_mean (DataFrame): dataframe containing slide_submitter_id, cell_type, slide_submitter_id, solidity, roundness
-    tiles_all_schc.to_csv(f"{full_output_dir}/{slide_type}_all_schc_tiles.csv", sep="\t", index=False)
-    all_slide_clusters_characterized.to_csv(f"{full_output_dir}/{slide_type}_all_schc_clusters_labeled.csv", sep="\t", index=False)
-    all_slide_indiv_clusters.to_csv(f"{full_output_dir}/{slide_type}_indiv_schc_tiles.csv", sep="\t", index=False)
-    slide_indiv_clusters_labeled.to_csv(f"{full_output_dir}/{slide_type}_indiv_schc_clusters_labeled.csv", sep="\t", index=False)
-    all_prox_df.to_csv(f"{full_output_dir}/{slide_type}_features_clust_all_schc_prox.csv", sep="\t", index=False)
-    prox_indiv_schc_combined.to_csv(f"{full_output_dir}/{slide_type}_features_clust_indiv_schc_prox.csv", sep="\t", index=False)
-    shape_feature_means.to_csv(f"{full_output_dir}/{slide_type}_features_clust_shapes.csv", sep="\t", index=False)
-    all_features.to_csv(f"{full_output_dir}/{slide_type}_clustering_features.csv", sep="\t", index=False)
+    tiles_all_schc.to_csv(f"{output_dir}/{slide_type}_all_schc_tiles.csv", sep="\t", index=False)
+    all_slide_clusters_characterized.to_csv(f"{output_dir}/{slide_type}_all_schc_clusters_labeled.csv", sep="\t", index=False)
+    all_slide_indiv_clusters.to_csv(f"{output_dir}/{slide_type}_indiv_schc_tiles.csv", sep="\t", index=False)
+    slide_indiv_clusters_labeled.to_csv(f"{output_dir}/{slide_type}_indiv_schc_clusters_labeled.csv", sep="\t", index=False)
+    all_prox_df.to_csv(f"{output_dir}/{slide_type}_features_clust_all_schc_prox.csv", sep="\t", index=False)
+    prox_indiv_schc_combined.to_csv(f"{output_dir}/{slide_type}_features_clust_indiv_schc_prox.csv", sep="\t", index=False)
+    shape_feature_means.to_csv(f"{output_dir}/{slide_type}_features_clust_shapes.csv", sep="\t", index=False)
+    all_features.to_csv(f"{output_dir}/{slide_type}_clustering_features.csv", sep="\t", index=False)
 
 
-def post_processing(output_dir, slide_type="FF", metadata_path="", is_TCGA=True, merge_var="slide_submitter_id", sheet_name=None):
+def post_processing(output_dir, slide_type="FF", metadata_path="", is_TCGA=False, merge_var="slide_submitter_id", sheet_name=None):
     """
     Combine network and clustering features into a single file. If metadata_path is not None, add the metadata as well, based on variable slide_submitter_id
 
@@ -433,11 +425,11 @@ def post_processing(output_dir, slide_type="FF", metadata_path="", is_TCGA=True,
         merge_var (str): variable on which to merge (default: slide_submitter_id)
 
     """
-    full_output_dir = f"{output_dir}/4_spatial_features"
-    if not path.exists(full_output_dir):
-        os.mkdir(full_output_dir)
-    all_features_graph = pd.read_csv(f"{full_output_dir}/features/{slide_type}_all_graph_features.csv", sep="\t")
-    all_features_clustering =  pd.read_csv(f"{full_output_dir}/features/{slide_type}_clustering_features.csv", sep="\t")
+    output_dir = f"{output_dir}/4_spatial_features"
+    if not path.exists(output_dir):
+        os.mkdir(output_dir)
+    all_features_graph = pd.read_csv(f"{output_dir}/features/{slide_type}_all_graph_features.csv", sep="\t")
+    all_features_clustering =  pd.read_csv(f"{output_dir}/features/{slide_type}_clustering_features.csv", sep="\t")
 
     all_features_combined = pd.merge(all_features_graph, all_features_clustering)
 
@@ -455,7 +447,7 @@ def post_processing(output_dir, slide_type="FF", metadata_path="", is_TCGA=True,
         elif (file_extension == "txt") or (file_extension == "csv"):
             metadata = pd.read_csv(metadata_path, sep="\t")
         all_features_combined = pd.merge(all_features_combined, metadata, on=merge_var, how="left")
-    all_features_combined.to_csv(f"{full_output_dir}/all_features_combined.csv", sep="\t", index=False)
+    all_features_combined.to_csv(f"{output_dir}/all_features_combined.csv", sep="\t", index=False)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Derive spatial features")
@@ -505,13 +497,8 @@ if __name__ == "__main__":
 
     # Variables post-processing
     metadata_path = args.metadata_path
-    is_TCGA = args.is_TCGA
     merge_var = args.merge_var
     sheet_name=args.sheet_name
-
-    full_output_dir = f"{output_dir}/4_spatial_features"
-    if not path.exists(full_output_dir):
-        os.mkdir(full_output_dir)
 
     if path.isfile(cell_types_path):
         cell_types = pd.read_csv(cell_types_path, header=None).to_numpy().flatten()
@@ -520,7 +507,6 @@ if __name__ == "__main__":
 
     if (workflow_mode in [1, 2, 3]) & (graphs_path is None):
         predictions = pd.read_csv(tile_quantification_path, sep="\t")
-        predictions = predictions[cell_types + METADATA_COLS]
         slide_submitter_ids = list(set(predictions.slide_submitter_id))
         results = Parallel(n_jobs=NUM_CORES)(
             delayed(graphs.construct_graph)(predictions=predictions, slide_submitter_id=id)
@@ -532,9 +518,9 @@ if __name__ == "__main__":
             for slide_graph in results
         }
         joblib.dump(
-            all_graphs, f"{full_output_dir}/{slide_type}_graphs.pkl")
+            all_graphs, f"{output_dir}/{slide_type}_graphs.pkl")
 
-        graphs_path = f"{full_output_dir}/{slide_type}_graphs.pkl"
+        graphs_path = f"{output_dir}/{slide_type}_graphs.pkl"
 
     if workflow_mode == 1:
         print("Workflow mode: all steps")
@@ -556,7 +542,7 @@ if __name__ == "__main__":
             graphs_path=graphs_path, n_clusters=n_clusters, max_dist=max_dist, max_n_tiles_threshold=max_n_tiles_threshold, tile_size=tile_size, overlap=overlap)
 
         print("Post-processing: combining all features")
-        post_processing(output_dir=output_dir, slide_type=slide_type, metadata_path=metadata_path, is_TCGA=is_TCGA, merge_var=merge_var, sheet_name=sheet_name)
+        post_processing(output_dir=output_dir, slide_type=slide_type, metadata_path=metadata_path, is_TCGA=False, merge_var=merge_var, sheet_name=sheet_name)
 
         print("Finished with all steps.")
     elif workflow_mode == 2:
@@ -581,7 +567,7 @@ if __name__ == "__main__":
     elif workflow_mode == 4:
         print("Post-processing: combining all features")
 
-        post_processing(output_dir=output_dir, slide_type=slide_type, metadata_path=metadata_path, is_TCGA=is_TCGA, merge_var=merge_var, sheet_name=sheet_name)
+        post_processing(output_dir=output_dir, slide_type=slide_type, metadata_path=metadata_path, is_TCGA=False, merge_var=merge_var, sheet_name=sheet_name)
         print("Finished.")
     else:
         raise Exception("Invalid workflow mode, please choose one of the following (int): all = 1, graph-based = 2, clustering-based = 3, combining features = 4 (default: 1)")

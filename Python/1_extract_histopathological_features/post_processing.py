@@ -26,11 +26,12 @@ if __name__ == "__main__":
     parser.add_argument("--slide_type", help="Type of tissue slide (FF or FFPE)", required=True, type=str)
     args = parser.parse_args()
 
-    full_output_dir = f"{args.output_dir}"
     if not os.path.exists(args.output_dir):
-        output_dir = full_output_dir
+        print("Output folder exists"
+    else:
+        os.makedirs(output_dir)
 
     execute_postprocessing(
-        output_dir=full_output_dir,
+        output_dir=output_dir,
 	    slide_type=args.slide_type
     )
