@@ -99,7 +99,7 @@ abundance_threshold=0.5, shapiro_alpha=0.05, cutoff_path_length=2):
         for id in slide_submitter_ids
     )
     # Formatting and count the number of shortest paths with max length
-Ã    all_shortest_paths_thresholded = pd.concat(results, axis=0)
+    all_shortest_paths_thresholded = pd.concat(results, axis=0)
     all_shortest_paths_thresholded["n_paths"] = 1
     proximity_graphs = (
         all_shortest_paths_thresholded.groupby(
@@ -182,15 +182,11 @@ abundance_threshold=0.5, shapiro_alpha=0.05, cutoff_path_length=2):
 
 def compute_clustering_features(
     tile_quantification_path, output_dir, slide_type=DEFAULT_SLIDE_TYPE, cell_types=None, graphs_path=None, n_clusters=8, max_dist=None, max_n_tiles_threshold=2, tile_size=512, overlap=50):
-    output_dir = f"{output_dir}/4_spatial_features"
-    if not path.exists(output_dir):
-        os.mkdir(output_dir)
+    
     if cell_types is None:
         cell_types = DEFAULT_CELL_TYPES
 
     predictions = pd.read_csv(tile_quantification_path, sep="\t")
-    predictions = predictions[cell_types + METADATA_COLS]
-
     slide_submitter_ids = list(set(predictions.slide_submitter_id))
 
     #####################################
@@ -425,11 +421,8 @@ def post_processing(output_dir, slide_type="FF", metadata_path="", is_TCGA=False
         merge_var (str): variable on which to merge (default: slide_submitter_id)
 
     """
-    output_dir = f"{output_dir}/4_spatial_features"
-    if not path.exists(output_dir):
-        os.mkdir(output_dir)
-    all_features_graph = pd.read_csv(f"{output_dir}/features/{slide_type}_all_graph_features.csv", sep="\t")
-    all_features_clustering =  pd.read_csv(f"{output_dir}/features/{slide_type}_clustering_features.csv", sep="\t")
+    all_features_graph = pd.read_csv(f"{output_dir}/{slide_type}_all_graph_features.csv", sep="\t")
+    all_features_clustering =  pd.read_csv(f"{output_dir}/{slide_type}_clustering_features.csv", sep="\t")
 
     all_features_combined = pd.merge(all_features_graph, all_features_clustering)
 
