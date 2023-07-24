@@ -37,17 +37,17 @@ def execute_preprocessing(slides_folder, output_folder, clinical_file_path, N_sh
         os.makedirs(process_train_dir)
 
     # Perform image tiling, only kept images of interest
-    #create_tiles_from_slides(slides_folder=slides_folder, output_folder=full_output_path, clinical_file_path=clinical_file_path)
+    create_tiles_from_slides(slides_folder=slides_folder, output_folder=output_folder, clinical_file_path=clinical_file_path)
 
     # File required for training
     format_tile_data_structure(
         slides_folder=slides_folder,
-        output_folder=full_output_path,
+        output_folder=output_folder,
         clinical_file_path=clinical_file_path
     )
 
     # Convert tiles from jpg to TF record1
-    file_info = pd.read_csv(f"{output_folder}/1_histopathological_features/file_info_train.txt", sep="\t")
+    file_info = pd.read_csv(f"{output_folder}/file_info_train.txt", sep="\t")
     training_filenames = list(file_info["tile_path"].values)
     training_classids = [int(id) for id in list(file_info["class_id"].values)]
     tps = [int(id) for id in list(file_info["percent_tumor_cells"].values)]

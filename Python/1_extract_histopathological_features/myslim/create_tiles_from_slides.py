@@ -36,6 +36,7 @@ def create_tiles_from_slides(slides_folder, output_folder, clinical_file_path):
     tiles_folder = "{}/tiles".format(output_folder)
     if not os.path.exists(tiles_folder):
         os.makedirs(tiles_folder)
+        print(tiles_folder)
 
     # Subset images of interest (present in generated clinical file)
     clinical_file = pd.read_csv(clinical_file_path, sep="\t")

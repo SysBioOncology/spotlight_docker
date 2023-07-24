@@ -18,18 +18,12 @@ from preprocessing import preprocessing_factory
 tf.compat.v1.disable_eager_execution()
 
 tf.app.flags.DEFINE_integer("num_classes", 42, "The number of classes.")
+tf.app.flags.DEFINE_string("bot_out", None, "Output file for bottleneck features.")
+tf.app.flags.DEFINE_string("pred_out", None, "Output file for predictions.")
 tf.app.flags.DEFINE_string(
-    "bot_out", "../Output/bot_train.txt", "Output file for bottleneck features."
-)
+    "model_name", "inception_v4", "The name of the architecture to evaluate.")
 tf.app.flags.DEFINE_string(
-    "pred_out", "../Output/pred_train.txt", "Output file for predictions."
-)
-tf.app.flags.DEFINE_string(
-    "model_name", "inception_v4", "The name of the architecture to evaluate."
-)
-tf.app.flags.DEFINE_string(
-    "checkpoint_path", None, "The directory where the model was written to."
-)
+    "checkpoint_path", None, "The directory where the model was written to.")
 tf.app.flags.DEFINE_integer("eval_image_size", 299, "Eval image size.")
 tf.app.flags.DEFINE_string("file_dir", "../Output/process_train/", "")
 FLAGS = tf.app.flags.FLAGS
@@ -76,6 +70,9 @@ def main(_):
     init_fn = slim.assign_from_checkpoint_fn(
         checkpoint_path, slim.get_model_variables(model_variables)
     )
+
+    print(FLAGS.bot_out)
+    
     sess = tf.Session()
     init_fn(sess)
 
@@ -115,6 +112,7 @@ def main(_):
         tf.logging.info("used time: %s" % used_time)
 
     fto_bot.close()
+    fto_pred.close()
     sess.close()
 
 
