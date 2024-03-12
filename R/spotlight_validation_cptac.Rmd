@@ -1,0 +1,540 @@
+---
+title: "External validaton CPTAC-CM"
+output: html_document
+---
+
+<style type="text/css">
+.smaller {
+  font-size: 10px
+  font-style: normal
+}
+</style>
+
+```{r setup, include=FALSE, echo=FALSE}
+
+# packages
+suppressPackageStartupMessages({
+  library('dplyr')
+  library("corrplot")
+  library("gplots")
+  library("RColorBrewer")
+  library("Matrix")
+  library("ggridges")
+  library("ggplot2")
+  library('ggforce')
+  library("ggpubr")
+  library("reshape2")
+  library("ggrepel")
+  library('tidyr')
+  library('plyr')
+  library('purrr')
+  library('gridExtra')
+  library('rstatix')
+  library('ComplexHeatmap')
+  library('survival')
+  library('ggfortify')
+  library('survminer')
+})
+
+# change default settings to fit plots
+knitr::opts_chunk$set(fig.height = 8, fig.width = 14)
+
+civalue <- function(y, yhat) {
+  
+  y <- as.matrix(y) ; yhat <- as.matrix(yhat)
+  ifelse(dim(y)[2] > 1, Ly<-nrow(y), Ly<-length(y))
+  ci<-rep(0,Ly)
+  
+  s<-0 # score sum
+  n<-0 # pairs of scores
+  
+  ci <- sapply(1:ncol(y), function(X){
+    
+    for (i in 1:(Ly-1)) {
+
+      for (j in (i+1):Ly) {
+
+        if (y[i,X]>y[j,X]) {
+          
+          s<-s+(yhat[i,X]>yhat[j,X])+0.5*(yhat[i,X]==yhat[j,X]);
+          n<-n+1;
+          
+        } else if (y[i,X]<y[j,X]) {
+          
+          s<-s+(yhat[i,X]<yhat[j,X])+0.5*(yhat[i,X]==yhat[j,X]);
+          n<-n+1;
+          
+        }
+        
+      }
+      
+    }
+    ci<-s/n
+    return(ci)
+  })
+  names(ci) <- colnames(y)
+  return(ci)
+  
+}
+
+```
+
+> Retrieve spatial features
+
+```{r}
+
+cptac_cm_clinical <- data.table::fread(file = "data/spotlight_cptac/TCIA_CPTAC_Pathology_Portal_v2.csv")
+cptac_cm_clinical <- cptac_cm_clinical %>% 
+  filter(Vital_status_at_12months_follow_up != "Not Reported" &
+           Last_Known_vital_status != "Not Reported" & 
+           Specimen_Type == "tumor_tissue" &
+           Tumor_Segment_Acceptable == "Yes")
+
+#########################
+# Cell-type probability #
+#########################
+cptac_pred_folder <- "./data/spotlight_cptac/"
+
+cell_prob <- read.csv(file = file.path(
+  cptac_pred_folder, "2_tile_level_quantification/test_tile_predictions_proba.csv"),
+                      sep = "\t")
+cell_prob <- cell_prob %>%
+  tidyr::pivot_longer(cols = !colnames(cell_prob)[5:8], 
+                      names_to = "celltype",
+                      values_to = "prob")
+
+# Bring prob to same scale [0,1]
+cell_prob <- cell_prob %>%
+  dplyr::group_by(celltype) %>%
+  dplyr::mutate(norm_prob=linear_func(prob))
+
+# Calculate median probability for each slide
+cell_prob_mean <- cell_prob %>%
+  dplyr::group_by(slide_submitter_id, celltype) %>% 
+  dplyr::summarise(mean_prob=mean(prob))
+
+cell_prob_mean <- cell_prob_mean %>%
+  dplyr::mutate(celltype = gsub("T_cells", "Tcell", celltype),
+                celltype = gsub("endothelial_cells", "Endo", celltype),
+                celltype = gsub("tumor_purity", "Tumor", celltype))
+
+## to data.frame/matrix
+tmp_prob <- cell_prob_mean %>%
+  dplyr::select(slide_submitter_id, celltype, mean_prob) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id,
+                     names_from = celltype, 
+                     values_from = mean_prob)
+## rename columns
+colnames(tmp_prob)[2:5] <- paste0("mean_P(", colnames(tmp_prob)[2:5], ")")
+
+#########################
+# Colocalization
+#########################
+cell_coloc <- read.csv(file = file.path(
+  cptac_pred_folder, "3_spatial_features/FF_features_coloc_fraction.csv"), 
+  sep = "\t")
+cell_coloc <- cell_coloc %>% 
+  dplyr::mutate(pat_id = substr(slide_submitter_id, 1, 12)) %>%
+  dplyr::mutate(pair = gsub("T_cells", "Tcell", pair),
+                pair = gsub("endothelial_cells", "Endo", pair),
+                pair = gsub("tumor_purity", "Tumor", pair))
+
+tmp_coloc <- cell_coloc %>%
+  select(slide_submitter_id, pair, frac) %>%
+  pivot_wider(id_cols = slide_submitter_id, 
+              names_from = pair, 
+              values_from = frac)
+
+colnames(tmp_coloc)[2:ncol(tmp_coloc)] <- paste0("Coloc(", colnames(tmp_coloc)[2:ncol(tmp_coloc)], ")")
+colnames(tmp_coloc)[2:ncol(tmp_coloc)] <- gsub("-", ",", colnames(tmp_coloc)[2:ncol(tmp_coloc)])
+
+#########################
+# Node degree
+#########################
+ND <- read.csv(file =  file.path(
+  cptac_pred_folder, "3_spatial_features/FF_features_ND.csv"), sep = "\t")
+ND <- ND %>% 
+  dplyr::mutate(pat_id = substr(slide_submitter_id, 1, 12),
+                celltype_pair = paste0(center, "-",neighbor)) %>%
+  dplyr::mutate(celltype_pair = gsub("T_cells", "Tcell", celltype_pair),
+                celltype_pair = gsub("endothelial_cells", "Endo", celltype_pair),
+                celltype_pair = gsub("tumor_purity", "Tumor", celltype_pair))
+
+tmp_ND <- ND %>%
+  dplyr::select(slide_submitter_id, celltype_pair, mean_obs) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id, 
+                     names_from = celltype_pair, 
+                     values_from = mean_obs)
+
+colnames(tmp_ND)[2:ncol(tmp_ND)] <- paste0("mean_ND(", colnames(tmp_ND)[2:ncol(tmp_ND)], ")")
+colnames(tmp_ND)[2:ncol(tmp_ND)] <- gsub("-", ",", colnames(tmp_ND)[2:ncol(tmp_ND)])
+
+#########################
+# Node degree effect size
+#########################
+ND_ES <- read.csv(file = file.path(
+  cptac_pred_folder, "3_spatial_features/FF_features_ND_ES.csv"), sep = "\t")
+ND_ES <- ND_ES %>% 
+  dplyr::mutate(pat_id = substr(slide_submitter_id, 1, 12), 
+                celltype_pair = paste0(center, "-",neighbor)) %>%
+  dplyr::mutate(celltype_pair = gsub("T_cells", "Tcell", celltype_pair),
+                celltype_pair = gsub("endothelial_cells", "Endo", celltype_pair),
+                celltype_pair = gsub("tumor_purity", "Tumor", celltype_pair))
+
+### Effect size node degree
+tmp_ND_ES <- ND_ES %>%
+  dplyr::select(slide_submitter_id, celltype_pair, effect_size) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id, 
+                     names_from = celltype_pair, 
+                     values_from = effect_size)
+
+colnames(tmp_ND_ES)[2:ncol(tmp_ND_ES)] <- paste0("ND_effsize(", colnames(tmp_ND_ES)[2:ncol(tmp_ND_ES)], ")")
+colnames(tmp_ND_ES)[2:ncol(tmp_ND_ES)] <- gsub("-", ",", colnames(tmp_ND_ES)[2:ncol(tmp_ND_ES)])
+
+#########################
+# Number of shortest paths
+#########################
+shortest_paths_max2 <- read.csv(file = file.path(
+  cptac_pred_folder, "3_spatial_features/FF_features_shortest_paths_thresholded.csv"), sep = "\t")
+
+shortest_paths_max2 <- shortest_paths_max2 %>% 
+  dplyr::mutate(pat_id = substr(slide_submitter_id, 1, 12)) %>%
+  dplyr::rename('celltype_pair' = 'pair') %>%
+  dplyr::mutate(celltype_pair = gsub("T_cells", "Tcell", celltype_pair),
+                celltype_pair = gsub("endothelial_cells", "Endo", celltype_pair),
+                celltype_pair = gsub("tumor_purity", "Tumor", celltype_pair))
+
+## Shortest paths
+tmp_paths <- shortest_paths_max2 %>%
+  dplyr::select(slide_submitter_id, celltype_pair, n_paths) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id,
+                     names_from = celltype_pair, 
+                     values_from = n_paths)
+
+colnames(tmp_paths)[2:ncol(tmp_paths)] <- paste0("n_shortest_paths(", colnames(tmp_paths)[2:ncol(tmp_paths)], ")")
+colnames(tmp_paths)[2:ncol(tmp_paths)] <- gsub("-", ",", colnames(tmp_paths)[2:ncol(tmp_paths)])
+
+#########################
+# LCC
+#########################
+LCC <- read.csv(file = file.path(
+  cptac_pred_folder, "3_spatial_features/FF_features_lcc_fraction.csv"), sep = "\t")
+
+LCC <- LCC %>%
+  dplyr::mutate(pat_id = substr(slide_submitter_id, 1, 12)) %>%
+  dplyr::rename("LCC(CAFs)" = "LCC.CAFs.clusters",
+                "LCC(Tcell)" = "LCC.T.cells.clusters", 
+                "LCC(Endo)" = "LCC.endothelial.cells.clusters",
+                "LCC(Tumor)" = "LCC.tumor.purity.clusters")
+tmp_lcc <- LCC %>%
+    dplyr::select(!pat_id)
+
+#########################
+# fraction clusters
+#########################
+clust_labels_1 <- read.csv(file = file.path(
+  cptac_pred_folder, "3_spatial_features/FF_indiv_schc_clusters_labeled.csv"), sep = "\t")
+
+clust_labels_1 <- clust_labels_1 %>%
+  dplyr::mutate(is_high = gsub("True", TRUE, is_high)) %>%
+  dplyr::mutate(is_high = gsub("False", FALSE, is_high))
+
+# Count clusters
+clust_labels_1 <- clust_labels_1 %>% 
+  dplyr::group_by(slide_submitter_id, cell_type_map) %>%
+  dplyr::summarise(frac_clusters=sum(as.logical(is_high))/8) %>%
+  dplyr::mutate(pat_id = substr(slide_submitter_id, 1, 12),
+                cell_type_map = gsub("T_cells", "Tcell", cell_type_map),
+                cell_type_map = gsub("endothelial_cells", "Endo", cell_type_map),
+                cell_type_map = gsub("tumor_purity", "Tumor", cell_type_map))
+
+tmp_frac_clusters <- clust_labels_1 %>%
+  dplyr::select(slide_submitter_id, cell_type_map, frac_clusters) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id, 
+                     names_from = cell_type_map, 
+                     values_from = frac_clusters)
+
+colnames(tmp_frac_clusters)[2:ncol(tmp_frac_clusters)] <- 
+  paste0("frac_clust(", colnames(tmp_frac_clusters)[2:ncol(tmp_frac_clusters)], ")")
+
+#########################
+# proximity clusters
+#########################
+clust_proximity_1 <- read.csv(file = file.path(
+  cptac_pred_folder, "3_spatial_features/FF_features_clust_indiv_schc_prox.csv"), sep = "\t")
+
+# Read individual clusters proximity features #
+clust_proximity_1 <- clust_proximity_1 %>%
+  dplyr::mutate(pat_id = substr(slide_submitter_id, 1, 12)) %>%
+  dplyr::rename("pair" = "pair..comparison.") %>%
+  dplyr::mutate(pair = gsub("T_cells", "Tcell", pair),
+                pair = gsub("endothelial_cells", "Endo", pair),
+                pair = gsub("tumor_purity", "Tumor", pair))
+
+clust_proximity_1 <- clust_proximity_1 %>%
+  mutate(source=sapply(strsplit(pair, "-"), head, 1), 
+         target=sapply(strsplit(pair, "-"), function(X) return(X[2]))) %>%
+  mutate(target=sapply(strsplit(target, " "), head, 1))
+
+tmp_prox_clusters <- clust_proximity_1 %>% 
+  dplyr::select(slide_submitter_id, pair, proximity) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id, 
+                     names_from = pair, 
+                     values_from = proximity)
+
+colnames(tmp_prox_clusters)[2:ncol(tmp_prox_clusters)] <- 
+  paste0("prox_clust(", colnames(tmp_prox_clusters)[2:ncol(tmp_prox_clusters)], ")")
+colnames(tmp_prox_clusters)[2:ncol(tmp_prox_clusters)] <- 
+  gsub("-", ",", colnames(tmp_prox_clusters)[2:ncol(tmp_prox_clusters)])
+
+#########################
+# shapes clusters
+#########################
+shape <- read.csv(file = file.path(
+  cptac_pred_folder, "3_spatial_features/FF_features_clust_shapes.csv"), sep = "\t")
+
+shape <- shape %>%
+  dplyr::select(slide_submitter_id, cell_type, solidity, roundness) %>%
+  dplyr::mutate(cell_type = gsub("T_cells", "Tcell", cell_type),
+                cell_type = gsub("endothelial_cells", "Endo", cell_type),
+                cell_type = gsub("tumor_purity", "Tumor", cell_type))
+
+# solidity
+tmp_solidity <- shape %>%
+  dplyr::select(slide_submitter_id, cell_type, solidity) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id, 
+                     names_from = cell_type, 
+                     values_from = solidity)
+
+colnames(tmp_solidity)[2:ncol(tmp_solidity)] <- paste0("sol_clust(", colnames(tmp_solidity)[2:ncol(tmp_solidity)], ")")
+
+# roundness
+tmp_roudnness <- shape %>%
+  dplyr::select(slide_submitter_id, cell_type, roundness) %>%
+  tidyr::pivot_wider(id_cols = slide_submitter_id, 
+                     names_from = cell_type, 
+                     values_from = roundness) %>%
+  as.data.frame()
+
+colnames(tmp_roudnness)[2:ncol(tmp_roudnness)] <- paste0("round_clust(", colnames(tmp_roudnness)[2:ncol(tmp_roudnness)], ")")
+
+# Put together
+all_table <- inner_join(tmp_prob, tmp_coloc, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_ND, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_ND_ES, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_paths, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_lcc, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_frac_clusters, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_prox_clusters, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_solidity, by = "slide_submitter_id")
+all_table <- inner_join(all_table, tmp_roudnness, by = "slide_submitter_id")
+all_table <- all_table %>%
+  tibble::column_to_rownames(var = "slide_submitter_id")
+
+colnames(all_table) <- gsub("T_cells", "Tcell", colnames(all_table))
+colnames(all_table) <- gsub("endothelial_cells", "Endo", colnames(all_table))
+colnames(all_table) <- gsub("tumor_purity", "Tumor", colnames(all_table))
+colnames(all_table) <- gsub("CAFs", "CAF", colnames(all_table))
+colnames(all_table) <- gsub("high", "H", colnames(all_table))
+colnames(all_table) <- gsub("low", "L", colnames(all_table))
+
+all_table_numeric <- apply(all_table, 2, as.numeric)
+rownames(all_table_numeric) <- rownames(all_table)
+
+saveRDS(all_table_numeric, file = "./results/features_matrix_validation_cptac_cm.rds")
+
+```
+
+> Association with survival (cptac-cm)
+
+- 1-year disease-free survival
+
+```{r}
+
+all_table_cptac <- readRDS(file = "./results/features_matrix_validation_cptac_cm.rds")
+
+## Remove uninformative features (shape of clusters) ------------------------------------------------------
+shape_tmp <- grep("sol_clust|round_clust", colnames(all_table_cptac))
+all_table_cptac <- all_table_cptac[, -shape_tmp]
+  
+## Set uninformative features values (NAs) to zero ------------------------------------------------------
+prox_tmp <-  grep("prox_clust", colnames(all_table_cptac))
+n_shortest_paths_tmp <-  grep("n_shortest_paths", colnames(all_table_cptac))
+lcc_tmp <-  grep("LCC", colnames(all_table_cptac))
+nd_tmp <-  grep("ND", colnames(all_table_cptac))
+coloc_tmp <-  grep("Coloc", colnames(all_table_cptac))
+
+tmp <- all_table_cptac[, prox_tmp]
+tmp[is.na(all_table_cptac[, prox_tmp])] <- 0
+all_table_cptac[, prox_tmp] <- tmp
+
+tmp <- all_table_cptac[, n_shortest_paths_tmp]
+tmp[is.na(all_table_cptac[, n_shortest_paths_tmp])] <- 0
+all_table_cptac[, n_shortest_paths_tmp] <- tmp
+
+tmp <- all_table_cptac[, lcc_tmp]
+tmp[is.na(all_table_cptac[, lcc_tmp])] <- 0
+all_table_cptac[, lcc_tmp] <- tmp
+
+tmp <- all_table_cptac[, nd_tmp]
+tmp[is.na(all_table_cptac[, nd_tmp])] <- 0
+all_table_cptac[, nd_tmp] <- tmp
+
+tmp <- all_table_cptac[, coloc_tmp]
+tmp[is.na(all_table_cptac[, coloc_tmp])] <- 0
+all_table_cptac[, coloc_tmp] <- tmp
+
+## Remove patients with all NA values ------------------------------------------------------
+hist(apply(is.na(all_table_cptac), 1, sum))
+
+# No patients to be removed
+
+### matrix to df
+all_table_cptac <- as.data.frame(all_table_cptac)
+all_table_cptac$pat_id <- rownames(all_table_cptac)
+all_table_df <- all_table_cptac %>% 
+  tidyr::pivot_longer(cols = !pat_id,
+                      names_to = "feature",
+                      values_to = "feature_score")
+
+features <- colnames(all_table_cptac)[1:96]
+
+### survival info from liu (both PFI and OS are recommended for SKCM)
+cptac_DFS <- cptac_cm_clinical %>% 
+  select(Case_ID, Specimen_ID, Slide_ID, Tumor_Site, 
+         Vital_status_at_12months_follow_up, Vital_status_at_24months_follow_up, Last_Known_vital_status) %>%
+  dplyr::rename("pat_id" = "Slide_ID") %>%
+  mutate(DFS.12months.status = ifelse(Vital_status_at_12months_follow_up == "Living", 1, 0),
+         DFS.24months.status = ifelse(Vital_status_at_24months_follow_up == "Living", 1, 0)) %>%
+  mutate(DFS.12months.status = as.numeric(DFS.12months.status),
+         DFS.24months.status = as.numeric(DFS.24months.status))
+
+table_with_survival_df <- inner_join(all_table_df, cptac_DFS, by = "pat_id")
+
+###########################################
+### ROC curves
+###########################################
+
+table_with_survival_df <- table_with_survival_df %>% 
+  tidyr::pivot_wider(id_cols = c(pat_id, DFS.12months.status, DFS.24months.status), 
+                     names_from = feature, 
+                     values_from = feature_score) %>%
+  tibble::column_to_rownames(var = "pat_id")
+
+features <- colnames(all_table_cptac)[1:96]
+
+## Check distribution of missing values
+missing_values_cptac_features <- apply(table_with_survival_df[, features], 2, function(X) sum(is.na(X)))
+missing_values_cptac_patients <- apply(table_with_survival_df[, features], 1, function(X) sum(is.na(X)))
+
+AUC_ls <- lapply(features, function(X){
+  
+  print(X)
+  
+  tmp <- table_with_survival_df[, X, drop=F]
+  idx <- !is.na(tmp[X])
+  feature_value <- tmp[idx, ,drop=TRUE]
+
+  response <- table_with_survival_df$DFS.12months.status
+  names(response) <- rownames(table_with_survival_df)
+  response <- response[idx]
+
+  pred <- ROCR::prediction(feature_value, 
+                           response,
+                           label.ordering = c(0, 1))
+  roc_perf <- ROCR::performance(pred, measure = "prec", x.measure = "rec")
+  aucpr_perf <- unlist(ROCR::performance(pred, "aucpr")@y.values)
+  roc_perf <- ROCR::performance(pred, measure = "tpr", x.measure = "fpr")
+  auc_perf <- unlist(ROCR::performance(pred, "auc")@y.values)
+  roc_perf <- ROCR::performance(pred, measure = "tpr", x.measure = "fpr")
+  f_perf <- unlist(ROCR::performance(pred, "prec")@y.values)
+  return(list(auc=auc_perf, aucpr = aucpr_perf,f = f_perf))
+  
+})
+names(AUC_ls) <- features
+
+AUC_df <- reshape2::melt(AUC_ls)
+names(AUC_df) <- c("performance", "metric", "feature")
+
+tmp_auc <- AUC_df %>%
+  dplyr::filter(metric == "auc") %>%
+  dplyr::arrange(desc(performance))
+
+tmp_auc$feature <- factor(tmp_auc$feature, levels = rev(tmp_auc$feature))
+AUC_barplot <- tmp_auc %>%
+  ggplot(aes(x=feature, y=performance)) +
+  geom_bar(stat = "identity", fill = "red3") + 
+  labs(y="Area under the ROC curve") +
+  theme_classic() + 
+  ylim(c(0,1)) + 
+  geom_hline(yintercept = 0.5, color = "gray") +
+  theme(axis.title.y = element_blank(), 
+        axis.text.x = element_text(size = 10, angle = 0, color = "black"),
+        axis.text.y = element_text(size = 8, angle = 0, color = "black"),
+        strip.background = element_blank(), strip.text = element_text(size = 12, color = "black")) +
+  coord_flip()
+
+AUC_barplot
+ggsave(filename = "./figures/validation//barplot_AUC_performance_CPTAC-CM_2years.pdf",
+       width = 8, height = 12, bg = "white")
+
+AUC_barplot
+ggsave(filename = "./figures/validation//barplot_AUC_performance_CPTAC-CM_2years.svg",
+       width = 8, height = 12, bg = "white", device = svg)
+
+tmp_aucpr <- AUC_df %>%
+  dplyr::filter(metric == "aucpr") %>%
+  dplyr::arrange(desc(performance))
+
+tmp_aucpr$feature <- factor(tmp_aucpr$feature, levels = rev(tmp_aucpr$feature))
+AUCPR_barplot <- tmp_aucpr %>%
+  ggplot(aes(x=feature, y=performance)) +
+  geom_bar(stat = "identity",  fill = "red3") + 
+  labs(y="Area under the Precision-Recall curve") +
+  theme_classic() + 
+  ylim(c(0,1)) + 
+  geom_hline(yintercept = 95/109, color = "gray") +
+  theme(axis.title.y = element_blank(), 
+        axis.text.x = element_text(size = 8, angle = 0, color = "black"),
+        axis.text.y = element_text(size = 8, angle = 0, color = "black"),
+        strip.background = element_blank(), strip.text = element_text(size = 12, color = "black")) +
+  coord_flip()
+
+AUCPR_barplot
+ggsave(filename = "./figures/validation/barplot_AUCPR_performance_CPTAC-CM_2years.pdf",
+       width = 8, height = 12, bg = "white")
+
+AUCPR_barplot
+ggsave(filename = "./figures/validation/barplot_AUCPR_performance_CPTAC-CM.svg",
+       width = 8, height = 12, bg = "white", device = svg)
+
+###########################################
+### Feature distributions among classes
+###########################################
+
+table_with_survival_df <- inner_join(all_table_df, cptac_DFS, by = "pat_id")
+table_with_survival_df$DFS.12months.status <- factor(table_with_survival_df$DFS.12months.status)
+  
+tmp <- table_with_survival_df %>%
+  dplyr::filter(feature %in% features) %>%
+  group_by(feature) %>%
+  rstatix::wilcox_test(feature_score ~ DFS.12months.status, ref.group = "0", p.adjust.method = "BH") %>%
+  add_significance() %>% 
+  add_xy_position(x = "feature")
+
+tmp$feature <- factor(tmp$feature, levels = tmp_auc$feature)
+tmp %>%
+  ggplot(aes(x = DFS.12months.status, y = feature_score, color = DFS.12months.status)) +
+  geom_boxplot() +
+  theme_classic() + 
+  scale_color_manual(values = c("green4", "red3"), guide = "none") +
+  facet_wrap(feature ~ ., scales = "free_y") +
+  theme(axis.title = element_blank(), 
+        axis.text.x = element_text(size = 12, angle = 45, hjust = 1, color = "black"),
+        axis.text.y = element_text(size = 12, angle = 0, color = "black"),
+        strip.background = element_blank(), strip.text = element_text(size = 12, color = "black"))
+
+```
+
+```
+
