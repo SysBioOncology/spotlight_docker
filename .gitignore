@@ -4,3 +4,7 @@ output_example/
 Python/libs/model/__pycache__/
 test_requirements.txt
 docker_test
+.DS_Store
+Python/.DS_Store
+Python/1_extract_histopathological_features/.DS_Store
+Python/libs/.DS_Store
