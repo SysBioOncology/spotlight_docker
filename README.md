@@ -2,8 +2,8 @@
 
 Our pipeline(SPoTLIghT) to derive spatial graph-based interpretable features from H&E tissue slides is packaged as a docker container.
 
-![](spotlight_a)
-![](spotlight_b)
+![](spotlight_a.jpg)
+![](spotlight_b.jpg)
 
 First, build the docker image as follows:
 
