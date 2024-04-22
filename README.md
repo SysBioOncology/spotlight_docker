@@ -11,10 +11,12 @@ First, build the docker image as follows:
 docker build -t run_spotlight_example:v1 . 
 ```
 
-Then, run the docker to execute the whole pipeline or execute separate steps as follows:
+Second, set the `WSI_TYPE` parameter to fresh-frozen `"FF"` or formalin-fixed, paraffin-embedded `"FFPE"` according to your whole slide images.
+Then, run the docker to execute the pipeline.
 
 ```bash
-docker run \                                                  
+docker run \
+--build-arg WSI_TYPE="FF" \                                                  
 -v $(pwd)/data/:/data:ro \
 -v $(pwd)/data_example/:/data_example:ro \
 -v $(pwd)/output_example/1_histopathological_features:/output_example/1_histopathological_features:rw \

@@ -46,10 +46,11 @@ def tile_level_quantification(models_dir, output_dir, var_names_path, histopatho
     print(var_names)
 
     if slide_type == "FF":
-        histopatho_features = pd.read_csv(histopatho_features_path, sep="\t", index_col=0)
+        FEATURES_PATH = f"{histopatho_features_path}/features.txt"
+        histopatho_features = pd.read_csv(FEATURES_PATH, sep="\t", index_col=0)
     elif slide_type == "FFPE":
-        print(histopatho_features_path)
-        histopatho_features = dd.read_parquet(histopatho_features_path)
+        FEATURES_PATH = f"{histopatho_features_path}/features_format_parquet"
+        histopatho_features = dd.read_parquet(FEATURES_PATH)
 
     print(histopatho_features.head())
 
