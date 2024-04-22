@@ -12,6 +12,7 @@ docker build -t run_spotlight_example:v1 .
 ```
 
 Second, set the `WSI_TYPE` parameter to fresh-frozen `"FF"` or formalin-fixed, paraffin-embedded `"FFPE"` according to your whole slide images.
+
 Then, run the docker to execute the pipeline.
 
 ```bash
