@@ -37,3 +37,8 @@ The pipeline comprises the following steps:
 1. Extract 1,536 histopathological features from Inception V4 model.
 2. Predict tile level abundances for the different cell types.
 3. Compute spatial features.
+
+## Output documentation
+
+SPoTLIghT generates the following output directory structure:
+
