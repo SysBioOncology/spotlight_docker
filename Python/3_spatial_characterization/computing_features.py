@@ -332,13 +332,14 @@ def compute_clustering_features(
     ####################################
 
     # Compute shape features based on clustering with all cell types simultaneously
-    slide_submitter_ids = list(set(predictions.slide_submitter_id))
-    all_slide_clusters_characterized = all_slide_clusters_characterized.rename(columns=dict(zip(cell_types, [f"is_{cell_type}_cluster" for cell_type in cell_types])))
-    tiles_all_schc = pd.merge(tiles_all_schc, all_slide_clusters_characterized, on=["slide_submitter_id", "cluster_label"])
+    #slide_submitter_ids = list(set(predictions.slide_submitter_id))
+    #all_slide_clusters_characterized = all_slide_clusters_characterized.rename(columns=dict(zip(cell_types, [f"is_{cell_type}_cluster" for cell_type in cell_types])))
+    #tiles_all_schc = pd.merge(tiles_all_schc, all_slide_clusters_characterized, on=["slide_submitter_id", "cluster_label"])
 
-    res = pd.concat(Parallel(n_jobs=NUM_CORES)(delayed(features.compute_shape_features)(tiles=tiles_all_schc, slide_submitter_id=id, tile_size=tile_size, overlap=overlap, cell_types=cell_types) for id in slide_submitter_ids))
-    res = res.drop(axis=1, labels=["cluster_label"])
-    shape_feature_means = res.groupby(["slide_submitter_id", "cell_type"]).mean().reset_index()
+    #res = pd.concat(Parallel(n_jobs=NUM_CORES)(delayed(features.compute_shape_features)(tiles=tiles_all_schc, slide_submitter_id=id, tile_size=tile_size, overlap=overlap, cell_types=cell_types) for id in 
+slide_submitter_ids))
+    #res = res.drop(axis=1, labels=["cluster_label"])
+    #shape_feature_means = res.groupby(["slide_submitter_id", "cell_type"]).mean().reset_index()
 
     ##############################################
     # ---- Formatting all computed features ---- #
@@ -374,16 +375,16 @@ def compute_clustering_features(
     prox_indiv_schc_combined_wide.columns = new_cols
     prox_indiv_schc_combined_wide = prox_indiv_schc_combined_wide.reset_index()
 
-    shape_feature_means_wide = shape_feature_means.pivot(index=["slide_submitter_id"], columns="cell_type")[["solidity", "roundness"]]
-    new_cols = [f'prox CC {col.replace("_", " ")}' for col in prox_indiv_schc_combined_wide.columns]
-    shape_feature_means_wide.columns = [f"{i.capitalize()} {j}"  for i, j in shape_feature_means_wide.columns]
-    shape_feature_means_wide = shape_feature_means_wide.reset_index()
+    #shape_feature_means_wide = shape_feature_means.pivot(index=["slide_submitter_id"], columns="cell_type")[["solidity", "roundness"]]
+    #new_cols = [f'prox CC {col.replace("_", " ")}' for col in prox_indiv_schc_combined_wide.columns]
+    #shape_feature_means_wide.columns = [f"{i.capitalize()} {j}"  for i, j in shape_feature_means_wide.columns]
+    #shape_feature_means_wide = shape_feature_means_wide.reset_index()
 
     # Store features
     all_features = pd.merge(frac_high_wide, num_clust_slide_wide, on=["slide_submitter_id"])
     all_features = pd.merge(all_features, all_prox_df_wide)
     all_features = pd.merge(all_features, prox_indiv_schc_combined_wide)
-    all_features = pd.merge(all_features, shape_feature_means_wide)
+    #all_features = pd.merge(all_features, shape_feature_means_wide)
 
     tiles_all_schc = tiles_all_schc.drop(axis=1, columns=cell_types) # drop the predicted probabilities
     all_slide_indiv_clusters = all_slide_indiv_clusters.drop(axis=1, columns=cell_types)# drop the predicted probabilities
@@ -405,7 +406,7 @@ def compute_clustering_features(
     slide_indiv_clusters_labeled.to_csv(f"{output_dir}/{slide_type}_indiv_schc_clusters_labeled.csv", sep="\t", index=False)
     all_prox_df.to_csv(f"{output_dir}/{slide_type}_features_clust_all_schc_prox.csv", sep="\t", index=False)
     prox_indiv_schc_combined.to_csv(f"{output_dir}/{slide_type}_features_clust_indiv_schc_prox.csv", sep="\t", index=False)
-    shape_feature_means.to_csv(f"{output_dir}/{slide_type}_features_clust_shapes.csv", sep="\t", index=False)
+    #shape_feature_means.to_csv(f"{output_dir}/{slide_type}_features_clust_shapes.csv", sep="\t", index=False)
     all_features.to_csv(f"{output_dir}/{slide_type}_clustering_features.csv", sep="\t", index=False)
 
 
