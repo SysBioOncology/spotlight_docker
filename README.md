@@ -12,10 +12,10 @@ Our pipeline (SPoTLIghT) to derive spatial graph-based interpretable features fr
 ```bash
 docker build -t run_spotlight:vfinal . 
 ```
-2. Create the structure of the repository
+2. Create the structure of the repository (in your working directory):
 ```bash
 mkdir -p data_example/images
-mkdir -p checkpoint/Retrained_Inception_v4
+mkdir -p data/checkpoint/Retrained_Inception_v4
 ```
 2. Add your FF histopathology slides into the `data_example/images` folder.
 3. Download retrained models to extract the histopathological features, available from Fu et al., Nat Cancer, 2020 ([Retrained_Inception_v4](https://www.ebi.ac.uk/biostudies/bioimages/studies/S-BSST292)). 
