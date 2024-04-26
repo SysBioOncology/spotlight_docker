@@ -15,7 +15,7 @@ docker build -t run_spotlight:vfinal .
 
 2. Add your FF histopathology slides into the `data_example` folder.
 3. Download retrained models to extract the histopathological features, available from Fu et al., Nat Cancer, 2020 ([Retrained_Inception_v4](https://www.ebi.ac.uk/biostudies/bioimages/studies/S-BSST292)). 
-Once you unzip the folder, extract the files to the `data` folder.
+Once you unzip the folder, extract the files to the `data/checkpoint/Retrained_Inception_v4/` folder.
 
 4. Run the docker to execute the pipeline.
 

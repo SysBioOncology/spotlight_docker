@@ -1,9 +1,8 @@
 data/
-data_example/images/
-output_example/
 Python/libs/model/__pycache__/
 test_requirements.txt
 docker_test
+data/.DS_Store
 .DS_Store
 Python/.DS_Store
 Python/1_extract_histopathological_features/.DS_Store
