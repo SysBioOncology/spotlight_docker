@@ -1,29 +1,32 @@
 # Integrating histopathology and transcriptomics for spatial profiling of the tumor microenvironment: a melanoma case study
 
-Our pipeline(SPoTLIghT) to derive spatial graph-based interpretable features from H&E tissue slides is packaged as a docker container.
+Our pipeline (SPoTLIghT) to derive spatial graph-based interpretable features from H&E (fresh-frozen, FF) tissue slides is packaged as a docker container.
 
 ![](spotlight_a.jpg)
 ![](spotlight_b.jpg)
 
-First, build the docker image as follows:
+## Run SPoTLIghT
+
+1. Build the docker image as follows:
 
 ```bash
-docker build -t run_spotlight_example:v1 . 
+docker build -t run_spotlight:vfinal . 
 ```
 
-Second, set the `WSI_TYPE` parameter to fresh-frozen `"FF"` or formalin-fixed, paraffin-embedded `"FFPE"` according to your whole slide images.
+2. Add your FF histopathology slides into the `data_example` folder.
+3. Download retrained models to extract the histopathological features, available from Fu et al., Nat Cancer, 2020 ([Retrained_Inception_v4](https://www.ebi.ac.uk/biostudies/bioimages/studies/S-BSST292)). 
+Once you unzip the folder, extract the files to the `data` folder.
 
-Then, run the docker to execute the pipeline.
+4. Run the docker to execute the pipeline.
 
 ```bash
 docker run \
---build-arg WSI_TYPE="FF" \                                                  
 -v $(pwd)/data/:/data:ro \
 -v $(pwd)/data_example/:/data_example:ro \
 -v $(pwd)/output_example/1_histopathological_features:/output_example/1_histopathological_features:rw \
 -v $(pwd)/output_example/2_tile_level_quantification:/output_example/2_tile_level_quantification:rw \
 -v $(pwd)/output_example/3_spatial_features:/output_example/3_spatial_features:rw \
-run_spotlight_example:v1
+run_spotlight:vfinal
 ```
 
 The pipeline comprises the following steps:
