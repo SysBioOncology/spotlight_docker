@@ -1,4 +1,4 @@
-data/
+data/TF_models/SKCM_FF_tmp
 Python/libs/model/__pycache__/
 test_requirements.txt
 docker_test
