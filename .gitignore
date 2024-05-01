@@ -1,4 +1,3 @@
-data/TF_models/SKCM_FF_tmp
 Python/libs/model/__pycache__/
 test_requirements.txt
 docker_test
@@ -7,3 +6,25 @@ data/.DS_Store
 Python/.DS_Store
 Python/1_extract_histopathological_features/.DS_Store
 Python/libs/.DS_Store
+data_example
+._*
+.docker_temp*
+.txt
+*.pyc
+data/checkpoint
+.vscode
+slurm_out
+output
+output_example
+# Ignore nextflow files in development
+nf-*
+.nextflow.log*
+*.nf
+.nextflow*
+nf_template.sh
+nextflow*
+
+*.sif
+spatial_features_matrix_TCGA.csv
+TEST-*
+clincial_file*.tsv
