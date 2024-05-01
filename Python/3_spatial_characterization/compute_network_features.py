@@ -5,7 +5,6 @@ import joblib
 from joblib import Parallel, delayed
 import pandas as pd
 
-sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
 
 import features.features as features # trunk-ignore(flake8/E402)
 import features.graphs as graphs # trunk-ignore(flake8/E402)

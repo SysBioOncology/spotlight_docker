@@ -5,14 +5,13 @@ import numpy as np
 import pandas as pd
 import sys
 
-sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
-REPO_DIR = os.path.dirname(os.getcwd())
 
 def create_TCGA_clinical_file(
     class_names,
     clinical_files_dir,
     output_dir=None,
     tumor_purity_threshold=80,
+    path_codebook=None
 ):
     """
     Create a clinical file based on the slide metadata downloaded from the GDC data portal
@@ -32,20 +31,17 @@ def create_TCGA_clinical_file(
 
     """
     # ---- Setup parameters ---- #
-    full_output_dir = f"{REPO_DIR}/{output_dir}/1_histopathological_features"
+    if not os.path.isdir(output_dir):
+        os.mkdir(output_dir)
 
-    if output_dir is None:
-        full_output_dir = f"{REPO_DIR}/output/1_extract_histopathological_features"
-    if not os.path.isdir(full_output_dir):
-        os.mkdir(full_output_dir)
-
-    if (os.path.isfile(class_names)): # multi class names
-        class_names = pd.read_csv(class_names, header=None).to_numpy().flatten()
-    else: # single class names
-        class_name =class_names
+    if (os.path.isfile(class_names)):  # multi class names
+        class_names = pd.read_csv(
+            class_names, header=None).to_numpy().flatten()
+    else:  # single class names
+        class_name = class_names
 
     CODEBOOK = pd.read_csv(
-        f"{REPO_DIR}/Python/1_extract_histopathological_features/codebook.txt",
+        path_codebook,
         delim_whitespace=True,
         header=None, names=["class_name", "value"]
     )
@@ -77,7 +73,8 @@ def create_TCGA_clinical_file(
                 CODEBOOK.loc[CODEBOOK["class_name"] == class_name].values[0][1]
             )
             clinical_file_list.append(clinical_file_temp)
-        clinical_file = pd.concat(clinical_file_list, axis=0).reset_index(drop=True)
+        clinical_file = pd.concat(
+            clinical_file_list, axis=0).reset_index(drop=True)
 
     # ---- 2) Filter: Availability of tumor purity (percent_tumor_cells) ---- #
     # Remove rows with missing tumor purity
@@ -93,7 +90,7 @@ def create_TCGA_clinical_file(
     )
     clinical_file = clinical_file.dropna(subset=["percent_tumor_cells"])
     clinical_file = clinical_file.where(
-        clinical_file["percent_tumor_cells"] >= tumor_purity_threshold
+        clinical_file["percent_tumor_cells"] >= float(tumor_purity_threshold)
     )
     # ---- 3) Formatting and saving ---- #
     clinical_file["image_file_name"] = [
@@ -118,10 +115,10 @@ def create_TCGA_clinical_file(
     ]
     clinical_file = clinical_file.dropna(how="any", axis=0)
     clinical_file.to_csv(
-            f"{full_output_dir}/generated_clinical_file.txt",
-            index=False,
-            sep="\t",
-        )
+        f"{output_dir}/generated_clinical_file.txt",
+        index=False,
+        sep="\t",
+    )
     print("\nFinished creating a new clinical file")
 
 
@@ -143,6 +140,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output_dir", help="Path to folder for saving all created files", default=None, required=False
     )
+    parser.add_argument(
+        "--path_codebook", help="Path to codebook", default=None, required=False
+    )
     args = parser.parse_args()
 
     create_TCGA_clinical_file(
@@ -150,4 +150,5 @@ if __name__ == "__main__":
         tumor_purity_threshold=args.tumor_purity_threshold,
         clinical_files_dir=args.clinical_files_dir,
         output_dir=args.output_dir,
+        path_codebook=args.path_codebook
     )

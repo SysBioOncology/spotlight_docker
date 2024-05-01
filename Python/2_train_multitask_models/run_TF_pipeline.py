@@ -10,8 +10,6 @@ import pandas as pd
 from sklearn import linear_model, metrics
 from sklearn.model_selection import GridSearchCV, GroupKFold
 from sklearn.preprocessing import StandardScaler
-REPO_DIR = git.Repo(os.getcwd(), search_parent_directories=True).working_tree_dir
-sys.path.append(f"{REPO_DIR}/Python/libs")
 
 # Custom imports
 import model.evaluate as meval

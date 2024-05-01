@@ -9,32 +9,31 @@
 # ----------------------------------- #
 
 # General setup
-repo_dir=$(pwd)
+repo_dir="/project"
 
 # command line rguments
-echo "Cell-type quantification: $1"
-echo "Slide type: $2";
-echo "Folder output: $3";
+echo "Slide type: $1";
 
-# Define input features
-tile_quantification_path=$1
+
+# Fixed dir
+output_dir=${repo_dir}/output
+
+# Fixed files
+tile_quantification_path="${output_dir}/2_tile_level_quantification/test_tile_predictions_proba.csv"
 
 # Define type of slide
-slide_type=$2
-
-# Define output directory
-output_dir=$3
+slide_type=$1
 
 # ---------------------------------- #
 # ---- Compute all features -------- #
 # ---------------------------------- #
 run_mode=1
-python $repo_path/Python/3_spatial_characterization/computing_features.py \
-    --workflow_mode=$run_mode \
-    --tile_quantification_path=$tile_quantification_path \
-    --output_dir=$output_dir/3_spatial_features \
-    --metadata_path=$output_dir/3_spatial_features/metadata.csv \
-    --slide_type=$slide_type # OPTIONAL BY DEFAULT FF
+python $repo_dir/Python/3_spatial_characterization/computing_features.py \
+    --workflow_mode $run_mode \
+    --tile_quantification_path $tile_quantification_path \
+    --output_dir $output_dir/3_spatial_features \
+    --metadata_path $output_dir/3_spatial_features/metadata.csv \
+    --slide_type $slide_type # OPTIONAL BY DEFAULT FF
     # --cell_types=$cell_types \   # OPTIONAL
     #--graphs_path=$graphs_path  # OPTIONAL
 

@@ -5,13 +5,12 @@ import pandas as pd
 from joblib import Parallel, delayed
 import argparse
 
-sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
-
-import features.clustering as clustering # trunk-ignore(flake8/E402)
-import features.features as features # trunk-ignore(flake8/E402)
-import features.graphs as graphs # trunk-ignore(flake8/E402)
+import features.clustering as clustering  # trunk-ignore(flake8/E402)
+import features.features as features  # trunk-ignore(flake8/E402)
+import features.graphs as graphs  # trunk-ignore(flake8/E402)
 
 NUM_CORES = multiprocessing.cpu_count()
+
 
 def compute_clustering_features(tile_quantification_path, output_dir, slide_type="FF", cell_types=None, graphs_path=None):
 
@@ -25,8 +24,9 @@ def compute_clustering_features(tile_quantification_path, output_dir, slide_type
     #####################################
 
     if graphs_path is None:
-        results = Parallel(n_jobs=NUM_CORES)(
-            delayed(graphs.construct_graph)(predictions=predictions, slide_submitter_id=slide_submitter_id)
+        results= Parallel(n_jobs=NUM_CORES)(
+            delayed(graphs.construct_graph)(predictions=predictions,
+                    slide_submitter_id=slide_submitter_id)
             for _, slide_submitter_id in slides.to_numpy()
         )
         # Extract/format graphs

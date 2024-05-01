@@ -27,3 +27,7 @@ def get_slide_submitter_id(tile_filename):
     tilename = tile_filename.strip(".jpg")
     slidename = tilename.split("_")[0]
     return slidename
+
+
+def name_function(name):
+    return f"features-{name}.parquet"
