@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH -J spotlight-docker
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=joan.kant@uhn.ca
+#SBATCH --mail-user=JohnDoe@mail.com
 #SBATCH --partition=veryhimem
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
