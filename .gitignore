@@ -28,3 +28,4 @@ nextflow*
 spatial_features_matrix_TCGA.csv
 TEST-*
 clincial_file*.tsv
+data/clinical_file_TCGA_SKCM.tsv
