@@ -33,6 +33,7 @@ slide_type="FF"
 tumor_purity_threshold=80
 class_names="SKCM_T"
 model_name="inception_v4"
+is_tcga=false
 
 echo "Create output directory: ${output_dir}..."
 mkdir -p ${output_dir}
@@ -50,7 +51,7 @@ apptainer exec \
     --cleanenv \
     -c \
     ${spotlight_sif} \
-    bash "/project/run_scripts/1_extract_histopatho_features.sh" ${checkpoint} ${clinical_files_dir} ${slide_type} ${class_names} ${tumor_purity_threshold} ${model_name}
+    bash "/project/run_scripts/1_extract_histopatho_features.sh" ${checkpoint} ${clinical_files_dir} ${slide_type} ${class_names} ${tumor_purity_threshold} ${model_name} ${is_tcga}
 
 echo "Tile level cell type quanitification (2 out of 3)"
 apptainer exec \

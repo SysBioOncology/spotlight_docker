@@ -39,22 +39,28 @@ slide_type=$3
 class_names=$4
 tumor_purity_threshold=$5
 model_name=$6
+is_tcga=$7 # true or false
 
 # ---------------------------------- #
 # ---- create new clinical file ---- #
 # ---------------------------------- #
 
-python $repo_dir/Python/1_extract_histopathological_features/myslim/create_clinical_file.py \
-    --class_names $class_names \
-    --clinical_files_dir $clinical_files_dir \
-    --tumor_purity_threshold $tumor_purity_threshold \
-    --output_dir $output_dir/1_histopathological_features \
-    --path_codebook ${path_codebook}
-
-clinical_file=$output_dir/1_histopathological_features/generated_clinical_file.txt
-
-ls $slides_dir | tee ${output_dir}/list_images.txt
-awk -v a=81 -v b="${class_names}" -v c=41 'FNR==NR{print; next}{split($1, tmp, "."); OFS="\t"; print tmp[1], tmp[1], $1, a, b, c}' $clinical_file ${output_dir}/list_images.txt > $output_dir/1_histopathological_features/final_clinical_file.txt
+if [ "$is_tcga" = true ]
+then
+    python $repo_dir/Python/1_extract_histopathological_features/myslim/create_clinical_file.py \
+        --class_names $class_names \
+        --clinical_files_dir $clinical_files_dir \
+        --tumor_purity_threshold $tumor_purity_threshold \
+        --output_dir $output_dir/1_histopathological_features \
+        --path_codebook ${path_codebook}
+    
+    clinical_file=$output_dir/1_histopathological_features/generated_clinical_file.txt
+else
+    clinical_file=$output_dir/1_histopathological_features/tmp_clinical_file.txt
+    ls $slides_dir | tee ${output_dir}/list_images.txt
+    awk -v a=81 -v b="${class_names}" -v c=41 'FNR==NR{print; next}{split($1, tmp, "."); OFS="\t"; print tmp[1], tmp[1], $1, a, b, c}' $clinical_file ${output_dir}/list_images.txt > $output_dir/1_histopathological_features/final_clinical_file.txt
+    clinical_file=$output_dir/1_histopathological_features/final_clinical_file.txt
+fi
 
 # --------------------------------------------------------- #
 # ---- image tiling and image conversion to TF records ---- #
@@ -63,7 +69,7 @@ awk -v a=81 -v b="${class_names}" -v c=41 'FNR==NR{print; next}{split($1, tmp, "
 python $repo_dir/Python/1_extract_histopathological_features/pre_processing.py \
     --slides_folder $slides_dir \
     --output_folder $output_dir/1_histopathological_features \
-    --clinical_file_path $output_dir/1_histopathological_features/final_clinical_file.txt
+    --clinical_file_path $clinical_file
 
 # ------------------------------------------------------ #
 # ---- Compute predictions and bottlenecks features ---- #
