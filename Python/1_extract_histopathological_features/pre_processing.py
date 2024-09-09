@@ -7,10 +7,6 @@ from myslim.create_file_info_train import format_tile_data_structure
 from myslim.create_tiles_from_slides import create_tiles_from_slides
 from myslim.datasets.convert import _convert_dataset
 
-# sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
-# REPO_DIR = os.path.dirname(os.getcwd())
-
-
 def execute_preprocessing(slides_folder, output_folder, clinical_file_path, N_shards=320):
     """
     Execute several pre-processing steps necessary for extracting the histopathological features
@@ -39,7 +35,9 @@ def execute_preprocessing(slides_folder, output_folder, clinical_file_path, N_sh
 
     # Perform image tiling, only kept images of interest
     create_tiles_from_slides(slides_folder=slides_folder,
-                             output_folder=output_folder, clinical_file_path=clinical_file_path)
+                             output_folder=output_folder, 
+                             clinical_file_path=clinical_file_path
+    )
 
     # File required for training
     format_tile_data_structure(

@@ -52,7 +52,7 @@ def create_tiles_from_slides(slides_folder, output_folder, clinical_file_path):
     print(len(images_for_tiling), 'images available:')
     counter=1
     for slide_filename in images_for_tiling:
-            if slide_filename.endswith(('.svs','.ndpi')):
+            if slide_filename.endswith(('.svs','.ndpi', '.tiff', '.tif')):
                 print(counter, ':', slide_filename)
                 slide = OpenSlide("{}/{}".format(slides_folder, slide_filename))
                 slide_name = slide_filename.split(".")[0]

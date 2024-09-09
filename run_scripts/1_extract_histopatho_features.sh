@@ -53,10 +53,10 @@ then
         --tumor_purity_threshold $tumor_purity_threshold \
         --output_dir $output_dir/1_histopathological_features \
         --path_codebook ${path_codebook}
-    
+
     clinical_file=$output_dir/1_histopathological_features/generated_clinical_file.txt
 else
-    clinical_file=$output_dir/1_histopathological_features/tmp_clinical_file.txt
+    clinical_file=${repo_dir}/data/tmp_clinical_file.txt
     ls $slides_dir | tee ${output_dir}/list_images.txt
     awk -v a=81 -v b="${class_names}" -v c=41 'FNR==NR{print; next}{split($1, tmp, "."); OFS="\t"; print tmp[1], tmp[1], $1, a, b, c}' $clinical_file ${output_dir}/list_images.txt > $output_dir/1_histopathological_features/final_clinical_file.txt
     clinical_file=$output_dir/1_histopathological_features/final_clinical_file.txt

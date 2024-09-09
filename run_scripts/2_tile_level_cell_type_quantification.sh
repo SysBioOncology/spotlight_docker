@@ -9,7 +9,7 @@
 # ----------------------------------- #
 
 # General setup
-repo_dir=project
+repo_dir="/project"
 
 # command line arguments
 echo "Slide type: $1";
