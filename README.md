@@ -67,6 +67,35 @@ model_name="inception_v4"
 is_tcga=false
 
 ````
+6. Run the pipeline by executing `run_pipeline.sh`
+
+````
+export APPTAINER_BINDPATH=${work_dir}/data/:/project/data:ro,${folder_images}:/project/images:ro,${output_dir}:/project/output:rw,${work_dir}/run_scripts:/project/run_scripts:ro,${work_dir}/Python:/project/Python:ro
+
+echo "Run pipeline..."
+echo "Extract histopathological features (1 out of 3)"
+apptainer exec \
+    --cleanenv \
+    -c \
+    ${spotlight_sif} \
+    bash "/project/run_scripts/1_extract_histopatho_features.sh" ${checkpoint} ${clinical_files_dir} ${slide_type} ${class_names} ${tumor_purity_threshold} ${model_name} ${is_tcga}
+
+echo "Tile level cell type quanitification (2 out of 3)"
+apptainer exec \
+    --cleanenv \
+    -c \
+    ${spotlight_sif} \
+    bash "/project/run_scripts/2_tile_level_cell_type_quantification.sh" $slide_type
+
+echo "Compute spatial features (3 out of 3)"
+apptainer exec \
+    --cleanenv \
+    -c \
+    ${spotlight_sif} \
+    bash "/project/run_scripts/3_compute_spatial_features.sh" ${slide_type}
+
+echo "COMPLETED!"
+````
 
 ## Output documentation
 
