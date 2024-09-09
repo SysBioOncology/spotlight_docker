@@ -63,6 +63,9 @@ tumor_purity_threshold=80
 class_names="SKCM_T"
 model_name="inception_v4"
 
+# Indicate whether the slides arise from the TCGA project
+is_tcga=false
+
 ````
 
 ## Output documentation
