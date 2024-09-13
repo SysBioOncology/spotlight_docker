@@ -73,6 +73,10 @@ is_tcga=false
 6. Run the pipeline by executing `run_pipeline.sh`
 
 ````
+echo "Create output directory: ${output_dir}..."
+mkdir -p ${output_dir}
+
+echo "Binding directories..."
 export APPTAINER_BINDPATH=${work_dir}/data/:/project/data:ro,${folder_images}:/project/images:ro,${output_dir}:/project/output:rw,${work_dir}/run_scripts:/project/run_scripts:ro,${work_dir}/Python:/project/Python:ro
 
 echo "Run pipeline..."
