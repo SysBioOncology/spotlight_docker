@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import tiffslide as openslide
 import os
 import sys
 
@@ -9,11 +10,8 @@ from PIL import Image
 sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
 REPO_DIR = os.path.dirname(os.getcwd())
 
-# trunk-ignore(flake8/E402)
-from openslide import OpenSlide
-
-# trunk-ignore(flake8/E402)
 import DL.image as im
+
 
 def create_tiles_from_slides(slides_folder, output_folder, clinical_file_path):
     """
@@ -43,52 +41,55 @@ def create_tiles_from_slides(slides_folder, output_folder, clinical_file_path):
     clinical_file.dropna(how="all", inplace=True)
     clinical_file.drop_duplicates(inplace=True)
     clinical_file.drop_duplicates(subset="slide_submitter_id", inplace=True)
-    subset_images=clinical_file.image_file_name.tolist()
+    subset_images = clinical_file.image_file_name.tolist()
     print(subset_images)
     # Check if slides are among our data
-    available_images=os.listdir(slides_folder)
-    images_for_tiling=list(set(subset_images) & set(available_images))
+    available_images = os.listdir(slides_folder)
+    images_for_tiling = list(set(subset_images) & set(available_images))
 
     print(len(images_for_tiling), 'images available:')
-    counter=1
+    counter = 1
     for slide_filename in images_for_tiling:
-            if slide_filename.endswith(('.svs','.ndpi', '.tiff', '.tif')):
-                print(counter, ':', slide_filename)
-                slide = OpenSlide("{}/{}".format(slides_folder, slide_filename))
-                slide_name = slide_filename.split(".")[0]
-                if (
-                    str(slide.properties.values.__self__.get("tiff.ImageDescription")).find(
-                        "AppMag = 40"
+        # Accept different file types
+        if slide_filename.endswith(('.svs', '.ndpi', '.tif')):
+            print(counter, ':', slide_filename)
+            slide = openslide.OpenSlide(
+                "{}/{}".format(slides_folder, slide_filename))
+            slide_name = slide_filename.split(".")[0]
+            if (
+                str(slide.properties["tiff.ImageDescription"]).find(
+                    "AppMag = 40"
+                )
+                != -1
+            ):
+                region_size = 1024
+                tile_size = 924
+            else:
+                region_size = 512
+                tile_size = 462
+            [width, height] = slide.dimensions
+            for x_coord in range(1, width, tile_size):
+                for y_coord in range(1, height, tile_size):
+                    slide_region = slide.read_region(
+                        location=(x_coord, y_coord),
+                        level=0,
+                        size=(region_size, region_size),
                     )
-                    != -1
-                ):
-                    region_size = 1024
-                    tile_size = 924
-                else:
-                    region_size = 512
-                    tile_size = 462
-                [width, height] = slide.dimensions
-                for x_coord in range(1, width, tile_size):
-                    for y_coord in range(1, height, tile_size):
-                        slide_region = slide.read_region(
-                            location=(x_coord, y_coord),
-                            level=0,
-                            size=(region_size, region_size),
+                    slide_region_converted = slide_region.convert("RGB")
+                    tile = slide_region_converted.resize(
+                        (512, 512), Image.ANTIALIAS)
+                    grad = im.getGradientMagnitude(np.array(tile))
+                    unique, counts = np.unique(grad, return_counts=True)
+                    if counts[np.argwhere(unique <= 20)].sum() < 512 * 512 * 0.6:
+                        tile.save(
+                            "{}/{}_{}_{}.jpg".format(
+                                tiles_folder, slide_name, x_coord, y_coord
+                            ),
+                            "JPEG",
+                            optimize=True,
+                            quality=94,
                         )
-                        slide_region_converted = slide_region.convert("RGB")
-                        tile = slide_region_converted.resize((512, 512), Image.ANTIALIAS)
-                        grad = im.getGradientMagnitude(np.array(tile))
-                        unique, counts = np.unique(grad, return_counts=True)
-                        if counts[np.argwhere(unique <= 20)].sum() < 512 * 512 * 0.6:
-                            tile.save(
-                                "{}/{}_{}_{}.jpg".format(
-                                    tiles_folder, slide_name, x_coord, y_coord
-                                ),
-                                "JPEG",
-                                optimize=True,
-                                quality=94,
-                            )
-                counter=counter+1
+            counter = counter + 1
 
     print("Finished creating tiles from the given slides")
 

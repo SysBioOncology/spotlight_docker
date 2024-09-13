@@ -1,3 +1,5 @@
+import tiffslide as openslide
+import DL.utils as utils
 import argparse
 import os
 import os.path
@@ -8,10 +10,9 @@ sys.path.append(f"{os.path.dirname(os.getcwd())}/Python/libs")
 REPO_DIR = os.path.dirname(os.getcwd())
 
 # trunk-ignore(flake8/E402)
-import DL.utils as utils
 
 # trunk-ignore(flake8/E402)
-from openslide import OpenSlide
+
 
 def format_tile_data_structure(slides_folder, output_folder, clinical_file_path):
     """
@@ -53,16 +54,16 @@ def format_tile_data_structure(slides_folder, output_folder, clinical_file_path)
     jpg_tiles_df = pd.merge(
         jpg_tile_names_df, clinical_file, on=["slide_submitter_id"], how="left"
     )
-
     # 4) Determine jpeg_quality of slides
     slide_quality = []
     for slide_name in jpg_tiles_df.image_file_name.unique():
         print("{}/{}".format(slides_folder, slide_name))
-        img = OpenSlide("{}/{}".format(slides_folder, slide_name))
-        #print(img.properties.values)
-        #image_description = img.properties.values.__self__.get("tiff.ImageDescription").split("|")[0]
-        #image_description_split = image_description.split(" ")
-        #jpeg_quality = image_description_split[-1]
+        # img = openslide.OpenSlide("{}/{}".format(slides_folder, slide_name))
+        # TODO have to generalize this for TCGA and non-TCGA cases.
+        # print(img.properties.values)
+        # image_description = img.properties.values.__self__.get("tiff.ImageDescription").split("|")[0]
+        # image_description_split = image_description.split(" ")
+        # jpeg_quality = image_description_split[-1]
         jpeg_quality = "80"
         slide_quality.append([slide_name, "RGB" + jpeg_quality])
 
@@ -76,9 +77,11 @@ def format_tile_data_structure(slides_folder, output_folder, clinical_file_path)
 
     # Create output dataframe
     output = jpg_tiles_df[
-        ["tile_path", "class_name", "class_id", "jpeg_quality", "percent_tumor_cells"]
+        ["tile_path", "class_name", "class_id",
+            "jpeg_quality", "percent_tumor_cells"]
     ]
-    output.to_csv(output_folder + "/file_info_train.txt", index=False, sep="\t")
+    output.to_csv(output_folder + "/file_info_train.txt",
+                  index=False, sep="\t")
 
     print("Finished creating the necessary file for computing the features in the next step")
 

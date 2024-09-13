@@ -30,3 +30,6 @@ TEST-*
 clincial_file*.tsv
 data/clinical_file_TCGA_SKCM.tsv
 *.tar.gz
+
+# Skip data files
+output_*

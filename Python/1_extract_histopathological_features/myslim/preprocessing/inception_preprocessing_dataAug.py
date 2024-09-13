@@ -246,7 +246,7 @@ def preprocess_for_train(image, height, width, bbox,
                              tf.expand_dims(rotated_image, 0))
 
         # crop image in the center
-        #rotated_image = tf.image.central_crop(rotated_image, 0.6)
+        # rotated_image = tf.image.central_crop(rotated_image, 0.6)
 
         if add_image_summaries:
             tf.summary.image('5_centralcropped_image',
