@@ -55,7 +55,9 @@ output_dir="/path/to/output_dir"
 # Relative to docker, i.e. start with /data
 
 checkpoint="/data/checkpoint/Retrained_Inception_v4/model.ckpt-100000"
-clinical_files_dir="/data/path/to/clinical/TCGA/file.tsv" # TCGA files
+# TCGA H&E images
+# clinical_files_dir="/data/path/to/clinical/TCGA/file.tsv"
+# Non-TCGA H&E images
 clinical_files_dir=NULL # Non-TCGA files
 
 # Remaining parameters (this configuration has been tested)
