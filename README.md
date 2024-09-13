@@ -31,12 +31,12 @@ docker save run_spotlight:vfinal -o {output_dir}/spotlight_docker.tar.gz
 apptainer build {output_dir}/spotlight_apptainer.sif docker-archive:spotlight_docker.tar.gz
 ```
 
-2. Add your FF histopathology slides to a subdirectory in the `spotlight_docker` directory, e.g. `data_example/images`
+2. Add your FF histopathology slides to a subdirectory in the `spotlight_docker` directory, e.g. `data_example/images`. * Please rename your images file names, so they only include "-", to follow the same sample coding used by the TCGA.
 
 3. Download retrained models to extract the histopathological features, available from Fu et al., Nat Cancer, 2020 ([Retrained_Inception_v4](https://www.ebi.ac.uk/biostudies/bioimages/studies/S-BSST292)). 
 Once you unzip the folder, extract the files to the `data/checkpoint/Retrained_Inception_v4/` folder.
 
-4. If a TCGA dataset is used, please download metadata (i.e. "biospecimen -> TSV", unzip and keep slide.tsv), then rename `slide.tsv` to `clinical_file_TCGA_{cancer_type_abbrev}` such as `clinical_file_TCGA_SKCM.tsv` and copy to `/data`. Example dataset TCGA-SKCM can be downloaded [here](https://portal.gdc.cancer.gov/projects/TCGA-SKCM)
+4. If a TCGA dataset is used, please download metadata (i.e. "biospecimen -> TSV", unzip and keep slide.tsv), then rename `slide.tsv` to `clinical_file_TCGA_{cancer_type_abbrev}` such as `clinical_file_TCGA_SKCM.tsv` and copy to `/data`. Example dataset TCGA-SKCM can be downloaded [here](https://portal.gdc.cancer.gov/projects/TCGA-SKCM). For non-TCGA datasets, please omit this step.
 
 5. Setup your paths and variables in `run_pipeline.sh`
 
@@ -55,7 +55,8 @@ output_dir="/path/to/output_dir"
 # Relative to docker, i.e. start with /data
 
 checkpoint="/data/checkpoint/Retrained_Inception_v4/model.ckpt-100000"
-clinical_files_dir="/data/path/to/clinical/TCGA/file.tsv"
+clinical_files_dir="/data/path/to/clinical/TCGA/file.tsv" # TCGA files
+clinical_files_dir=NULL # Non-TCGA files
 
 # Remaining parameters (this configuration has been tested)
 slide_type="FF"
