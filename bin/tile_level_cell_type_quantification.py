@@ -11,6 +11,8 @@ from model.constants import DEFAULT_CELL_TYPES
 from model.evaluate import compute_tile_predictions
 import time
 from argparse import ArgumentParser as AP
+import glob
+
 
 def get_args():
     # Script description
@@ -22,17 +24,17 @@ def get_args():
     parser.add_argument("--models_dir", type=str,
                         help="Path to models directory", required=True)
     parser.add_argument("--output_dir", type=str,
-                        help="Path to output directory", required=False, default = "")
+                        help="Path to output directory", required=False, default="")
     parser.add_argument("--histopatho_features_dir", type=str,
-                        help="Path to histopathological features file", required=False, default = "")
+                        help="Path to histopathological features file", required=False, default="")
     parser.add_argument("--var_names_path", type=str,
                         help="Path to variable names pkl file", required=True)
-    parser.add_argument("--features_input", type = str, default = None)
+    parser.add_argument("--features_input", type=str, default=None)
     parser.add_argument("--prediction_mode", type=str,
                         help="Choose prediction mode 'performance' or 'all' (default='all')", default="all", required=False)
     parser.add_argument("--n_outerfolds", type=int, default=5,
                         help="Number of outer folds (default=5)", required=False)
-    parser.add_argument("--cell_types_path", type=str, default="",
+    parser.add_argument("--cell_types", type=str, default=None,
                         help="List of cell types by default=['T_cells','CAFs',  'tumor_purity','endothelial_cells']", required=False)
     parser.add_argument(
         "--slide_type", help="Type of tissue slide (FF or FFPE)", type=str, required=True)
@@ -41,13 +43,24 @@ def get_args():
 
     if (arg.features_input is None):
         if arg.slide_type == "FF":
-            arg.features_input = Path(arg.histopatho_features_dir, "features.txt")
+            arg.features_input = Path(
+                arg.histopatho_features_dir, "features.txt")
 
         elif arg.slide_type == "FFPE":
-            arg.features_input = Path(arg.histopatho_features_dir, "features_format_parquet")
+            parquet_files = glob.glob1("", "*.parquet")
+            if (len(parquet_files) > 0):
+                if not (os.path.isdir("features_format_parquet")):
+                    os.mkdir("features_format_parquet")
+                for parquet_file in parquet_files:
+                    os.replace(parquet_file, Path(
+                        "features_format_parquet", parquet_file))
+
+            arg.features_input = Path(
+                arg.histopatho_features_dir, "features_format_parquet")
 
     if (not Path(arg.features_input).exists()):
-            raise Exception("Invalid argument, please check `features_input` or `histopatho_features_dir`")
+        raise Exception(
+            "Invalid argument, please check `features_input` or `histopatho_features_dir`")
 
     if ((arg.output_dir != "") & (not os.path.isdir(arg.output_dir))):
         # Create an empty folder for TF records if folder doesn't exist
@@ -55,7 +68,7 @@ def get_args():
     return arg
 
 
-def tile_level_quantification(features_input, models_dir, var_names_path, histopatho_features_dir="", prediction_mode="all", n_outerfolds=5, cell_types_path="", slide_type="FF"):
+def tile_level_quantification(features_input, models_dir, var_names_path, prediction_mode="all", n_outerfolds=5, cell_types="", slide_type="FF"):
     """
     Quantify the cell type abundances for the different tiles. Creates three files:
     (1) z-scores and
@@ -74,11 +87,8 @@ def tile_level_quantification(features_input, models_dir, var_names_path, histop
 
     """
     # Read data
-    cell_types = DEFAULT_CELL_TYPES
-    if os.path.isfile(cell_types_path):
-        cell_types = pd.read_csv(
-            cell_types_path, header=None).to_numpy().flatten()
-    print(cell_types)
+    if cell_types is None:
+        cell_types = DEFAULT_CELL_TYPES
 
     var_names = joblib.load(var_names_path)
     print(var_names)
@@ -104,7 +114,6 @@ def tile_level_quantification(features_input, models_dir, var_names_path, histop
         metadata = metadata.compute()
 
     print("Computing tile predictions for each cell type...")
-
     ##############################################################################
     # If predicting on all FFPE slides, we do this by chunks:
     # if any([prediction_mode == item for item in ['tcga_train_validation', 'test']]):
@@ -176,19 +185,18 @@ def main(args):
     tile_predictions, pred_proba = tile_level_quantification(
         features_input=args.features_input,
         models_dir=args.models_dir,
-        histopatho_features_dir=args.histopatho_features_dir,
         prediction_mode=args.prediction_mode,
         n_outerfolds=args.n_outerfolds,
-        cell_types_path=args.cell_types_path,
+        cell_types=args.cell_types,
         var_names_path=args.var_names_path,
         slide_type=args.slide_type)
 
-
     tile_predictions.to_csv(
-    Path(args.output_dir, f"{args.prediction_mode}_tile_predictions_zscores.csv"), sep="\t", index=False)
+        Path(args.output_dir, f"{args.prediction_mode}_tile_predictions_zscores.csv"), sep="\t", index=False)
     pred_proba.to_csv(
         Path(args.output_dir, f"{args.prediction_mode}_tile_predictions_proba.csv"), sep="\t", index=False)
     print("Finished tile predictions...")
+
 
 if __name__ == "__main__":
     args = get_args()
