@@ -11,11 +11,9 @@ data_example
 .docker_temp*
 .txt
 *.pyc
-data/checkpoint
 .vscode
 slurm_out
 output
-output_example
 # Ignore nextflow files in development
 nf-*
 .nextflow.log*
@@ -33,3 +31,33 @@ data/clinical_file_TCGA_SKCM.tsv
 
 # Skip data files
 output_*
+
+
+.nextflow*
+work/
+data/
+results/
+.DS_Store
+testing/
+testing*
+*.pyc
+
+output/
+assets/checkpoint
+assets/codebook.txt
+asse
+
+spotlight.sif
+plugins/*
+
+
+DUMMY-*
+BACKUP-*
+test-data
+
+
+ARCHIVE
+
+
+gaitilab.config
+nf_run_spotlight.sh
