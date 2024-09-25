@@ -42,23 +42,31 @@ Once you unzip the folder, extract the files to the `data/checkpoint/Retrained_I
 
 ```bash
 
-nextflow run . -profile apptainer -c "${your_config_file}"
+nextflow run . -profile apptainer -c "${your_config_file}" -outdir ${your_output_directory}
 
 ````
 
 ## Output documentation
 
-SPoTLIghT generates the following output directory structure:
+SPoTLIghT generates the following output directory structure for a run with FFPE slides:
+
+> Of note, when using FF slides, the directories `features_format_parquet` and `predictions_format_parquet` won't be created, instead, the files 'features.txt' and 'predictions.txt' are created.
 
 ```bash
 {outdir}
 ├── 1_extract_histopatho_features
 │   ├── avail_slides_for_img.csv
-│   ├── features-0.parquet
+│   ├── bot_train.txt
+│   ├── features_format_parquet
+│   │   ├── features-0.parquet
+│   │   ├── features-1.parquet
 │   ├── file_info_train.txt
 │   ├── generated_clinical_file.txt
-│   ├── ok.txt
-│   ├── predictions-0.parquet
+│   ├── pred_train.txt
+|   ├── process_train
+│   ├── predictions_format_parquet
+│   │   ├── predictions-0.parquet
+│   │   ├── predictions-0.parquet
 │   ├── process_train
 │   │   ├── images_train_00001-of-00320.tfrecord
 │   │   ├── images_train_00002-of-00320.tfrecord 
@@ -101,10 +109,6 @@ SPoTLIghT generates the following output directory structure:
 │       ├── FFPE_features_shortest_paths_thresholded_wide.csv
 │       ├── FFPE_graphs.pkl
 │       └── FFPE_shapiro_tests.csv
-├── bottleneck
-│   ├── bot_train.txt
-│   ├── ok.txt
-│   └── pred_train.txt
 └── pipeline_info
     ├── execution_report_2024-09-23_21-07-41.html
     ├── execution_timeline_2024-09-23_21-07-41.html
