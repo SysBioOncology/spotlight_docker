@@ -11,7 +11,6 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spot
 include { EXTRACT_HISTOPATHO_FEATURES } from '../subworkflows/local/extract_histopatho_features.nf'
 include { TF_LEARNING_CELLTYPE_QUANT} from '../subworkflows/local/tf_learning_celltyp_quant.nf'
 include { DERIVE_SPATIAL_FEATURES } from '../subworkflows/local/derive_spatial_features.nf'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW

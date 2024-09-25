@@ -6,6 +6,7 @@
 process BOTTLENECK_PREDICT {
     label 'mem_64G'
     label 'time_4h'
+    label 'extract_histo_patho_features'
 
     input:
     val bot_out

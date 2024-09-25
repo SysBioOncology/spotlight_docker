@@ -55,6 +55,7 @@ workflow NFCORE_SPOTLIGHT {
     var_names_path = file(params.var_names_path)
     cell_types_path = file(params.cell_types_path)
     metadata_path = file(params.metadata_path)
+    tpm_path = file(params.tpm_path)
 
     SPOTLIGHT (
         clinical_files_input,
@@ -89,7 +90,11 @@ workflow NFCORE_SPOTLIGHT {
         metadata_path,
         params.merge_var,
         params.sheet_name
-
+        // tpm_path, 
+        // params.skip_quantiseq,
+        // params.skip_mpc_counter,
+        // params.skip_xcell,
+        // params.skip_epic
     )
 
 }
