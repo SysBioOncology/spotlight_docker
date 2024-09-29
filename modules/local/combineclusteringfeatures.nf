@@ -23,4 +23,9 @@ process COMBINE_CLUSTERING_FEATURES {
         --prox_indiv_schc_combined_wide ${prox_indiv_schc_combined_wide} \\
         --prefix ${prefix}
     """
+
+    stub: 
+    """
+    touch "${prefix}_clustering_features.csv"
+    """
 }

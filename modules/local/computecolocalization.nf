@@ -11,8 +11,8 @@ process COMPUTE_COLOCALIZATION {
         val out_prefix
 
     output:
-        path  "${prefix}_features_coloc_fraction_wide.csv", emit: csv
-        path  "${prefix}_features_coloc_fraction.csv"
+        path "${prefix}_features_coloc_fraction_wide.csv", emit: csv
+        path "${prefix}_features_coloc_fraction.csv"
         path "${prefix}_graphs.pkl", optional: true
 
     script:
@@ -25,5 +25,12 @@ process COMPUTE_COLOCALIZATION {
         --abundance_threshold ${abundance_threshold} \\
         --n_cores ${task.cpus} \\
         --prefix ${prefix} ${graphs_path_arg} ${cell_types_arg}
+    """
+
+    stub: 
+    """
+    touch "${prefix}_features_coloc_fraction_wide.csv"
+    touch "${prefix}_features_coloc_fraction.csv"
+    touch "${prefix}_graphs.pkl"
     """
 }

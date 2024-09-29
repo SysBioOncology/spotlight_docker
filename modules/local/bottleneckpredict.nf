@@ -31,4 +31,11 @@ process BOTTLENECK_PREDICT {
         --file_dir \$PWD/ && touch \$PWD/ok.txt
 
     """
+
+    stub: 
+    """
+    touch ${bot_out}.txt
+    touch ${pred_out}.txt
+    touch ok.txt
+    """
 }

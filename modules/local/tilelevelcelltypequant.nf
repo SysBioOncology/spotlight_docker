@@ -26,4 +26,10 @@ process TILE_LEVEL_CELL_TYPE_QUANT {
         --slide_type ${slide_type} \
         --n_outerfolds ${n_outerfolds} ${cell_types_arg} ${features_input_arg}
     """
+
+    stub: 
+    """
+    touch "${prediction_mode}_tile_predictions_proba.csv"
+    touch "${prediction_mode}_tile_predictions_zscores.csv"
+    """
 }

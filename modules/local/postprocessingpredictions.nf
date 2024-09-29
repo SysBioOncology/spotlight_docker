@@ -43,4 +43,11 @@ process POST_PROCESSING_PREDICTIONS {
         --pred_train_file ${pred_train_file} \
         --path_tissue_classes "${path_tissue_classes}" && touch \$PWD/ok.txt
     """
+
+    stub: 
+    out_prefix = determine_out_prefix(slide_type)
+    """
+    touch ${out_prefix}
+    touch "ok.txt"
+    """
 }

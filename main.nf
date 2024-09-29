@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/spotlight
+    SysBioOncology/spotlight_docker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/spotlight
+    Github : https://github.com/SysBioOncology/spotlight_docker
     Website: https://nf-co.re/spotlight
     Slack  : https://nfcore.slack.com/channels/spotlight
 ----------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ workflow NFCORE_SPOTLIGHT {
     //     image_dir
 
 
-    main:
+    // main:
 
     clinical_files_input = file(params.clinical_files_input, checkIfExists: true)
     path_codebook = file(params.path_codebook, checkIfExists:true)
@@ -55,41 +55,57 @@ workflow NFCORE_SPOTLIGHT {
     var_names_path = file(params.var_names_path)
     cell_types_path = file(params.cell_types_path)
     metadata_path = file(params.metadata_path)
-    tpm_path = file(params.tpm_path)
+
+    // Immunedeconv files 
+    gene_exp_path = file(params.gene_exp_path)
+    quantiseq_path = file(params.quantiseq_path)
+    mpc_counter_path = file(params.mpc_counter_path)
+    xcell_path = file(params.xcell_path)
+    epic_path = file(params.epic_path)
+
+
+
 
     SPOTLIGHT (
-        clinical_files_input,
-        path_codebook,
-        params.class_name,
-        params.clinical_file_out_file,
-        params.tumor_purity_threshold,
-        params.is_tcga,
-        image_dir,
-        params.gradient_mag_filter,
-        params.n_shards,
-        params.bot_out,
-        params.pred_out,
-        params.model_name,
-        checkpoint_path,
-        params.slide_type,
-        path_tissue_classes,
-        celltype_models,
-        var_names_path,
-        params.prediction_mode,
-        cell_types_path,
-        params.n_outerfolds,
-        params.out_prefix,
-        params.abundance_threshold,
-        params.shapiro_alpha,
-        params.cutoff_path_length,
-        params.n_clusters,
-        params.max_dist,
-        params.max_n_tiles_threshold,
-        params.tile_size,
-        params.overlap,
-        metadata_path,
-        params.merge_var,
-        params.sheet_name
+        params.is_tpm,
+        params.deconv_tools,
+        gene_exp_path,
+        quantiseq_path,
+        mpc_counter_path,
+        xcell_path,
+        epic_path
+        // clinical_files_input,
+        // path_codebook,
+        // params.class_name,
+        // params.clinical_file_out_file,
+        // params.tumor_purity_threshold,
+        // params.is_tcga,
+        // image_dir,
+        // params.gradient_mag_filter,
+        // params.n_shards,
+        // params.bot_out,
+        // params.pred_out,
+        // params.model_name,
+        // checkpoint_path,
+        // params.slide_type,
+        // path_tissue_classes,
+        // celltype_models,
+        // var_names_path,
+        // params.prediction_mode,
+        // cell_types_path,
+        // params.n_outerfolds,
+        // params.out_prefix,
+        // params.abundance_threshold,
+        // params.shapiro_alpha,
+        // params.cutoff_path_length,
+        // params.n_clusters,
+        // params.max_dist,
+        // params.max_n_tiles_threshold,
+        // params.tile_size,
+        // params.overlap,
+        // metadata_path,
+        // params.merge_var,
+        // params.sheet_name
         // tpm_path, 
         // params.skip_quantiseq,
         // params.skip_mpc_counter,

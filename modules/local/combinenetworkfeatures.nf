@@ -23,4 +23,10 @@ process COMBINE_NETWORK_FEATURES {
         --colocalization_wide ${colocalization_wide} \\
         --prefix ${prefix}
     """
+
+
+    stub: 
+    """
+    touch "${prefix}_all_graph_features.csv"
+    """
 }

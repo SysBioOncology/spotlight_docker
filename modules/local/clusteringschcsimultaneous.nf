@@ -25,4 +25,12 @@ process CLUSTERING_SCHC_SIMULTANEOUS {
         --n_cores ${task.cpus} \\
         --prefix ${prefix} ${graphs_path_arg} ${cell_types_arg}
     """
+
+    stub: 
+    """
+    touch "${prefix}_all_schc_tiles_raw.csv"
+    touch "${prefix}_all_schc_clusters_labeled.csv"
+    touch "${prefix}_all_schc_tiles.csv"
+    touch "${prefix}_graphs.pkl"
+    """
 }

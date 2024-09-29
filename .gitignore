@@ -53,3 +53,5 @@ ARCHIVE
 
 gaitilab.config
 nf_run_spotlight.sh
+
+.fuse_hidden*

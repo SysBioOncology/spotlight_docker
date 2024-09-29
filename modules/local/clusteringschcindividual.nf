@@ -25,4 +25,13 @@ process CLUSTERING_SCHC_INDIVIDUAL {
         --n_cores ${task.cpus} \\
         --prefix ${prefix} ${graphs_path_arg} ${cell_types_arg}
     """
+
+
+    stub: 
+    """
+    touch "${prefix}_indiv_schc_tiles_raw.csv"
+    touch "${prefix}_indiv_schc_clusters_labeled.csv"
+    touch "${prefix}_graphs.pkl"
+    touch "${prefix}_indiv_schc_tiles.csv"
+    """
 }

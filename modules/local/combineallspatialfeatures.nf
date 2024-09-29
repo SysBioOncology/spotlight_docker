@@ -33,4 +33,8 @@ process COMBINE_ALL_SPATIAL_FEATURES {
 
     """
 
+    stub: 
+    """
+    touch "${prefix}_all_features_combined.csv"
+    """
 }

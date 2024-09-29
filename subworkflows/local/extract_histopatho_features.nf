@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the nf-core/spotlight pipeline
+// Subworkflow with functionality specific to the SysBioOncology/spotlight_docker pipeline
 //
 
 /*

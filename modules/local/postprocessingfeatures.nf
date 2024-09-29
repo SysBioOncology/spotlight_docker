@@ -37,5 +37,12 @@ process POST_PROCESSING_FEATURES {
         --slide_type ${slide_type} \
         --is_tcga ${is_tcga_numeric} && touch ok.txt
     """
+
+    stub: 
+    out_prefix = determine_out_prefix(slide_type)
+    """
+    touch ${out_prefix}
+    touch ok.txt
+    """
 }
 

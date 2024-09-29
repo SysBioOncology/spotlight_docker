@@ -20,4 +20,9 @@ process GENERATE_GRAPHS {
         --prefix ${prefix} \\
         --slide_type ${slide_type}
     """
+
+    stub: 
+    """
+    touch "${prefix}_graphs.pkl"
+    """
 }
