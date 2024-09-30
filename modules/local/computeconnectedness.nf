@@ -27,6 +27,8 @@ process COMPUTE_CONNECTEDNESS {
     """
 
     stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
     """
     touch "${prefix}_features_lcc_fraction_wide.csv"
     touch "${prefix}_graphs.pkl"

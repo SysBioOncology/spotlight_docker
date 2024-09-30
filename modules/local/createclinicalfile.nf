@@ -5,14 +5,14 @@ process CREATE_CLINICAL_FILE {
     input:
     path clinical_files_input
     val class_name
-    val out_file
+    val out_prefix
     path path_codebook
     val tumor_purity_threshold
     val is_tcga
     path image_dir
 
     output:
-    path "${out_file}.txt", emit: txt
+    path "${out_prefix}.txt", emit: txt
 
     script:
     def args   = task.ext.args   ?: ''
@@ -30,8 +30,13 @@ process CREATE_CLINICAL_FILE {
         list_txt =  "list_images.txt"
         """
         ls ${image_dir} | tee ${list_txt}
-        awk -v a=81 -v b="${class_name}" -v c=41 'FNR==NR{print; next}{split(\$1, tmp, "."); OFS="\t"; print tmp[1], tmp[1], \$1, a, b, c}' ${template_txt} ${list_txt} > ${out_file}.txt
+        awk -v a=81 -v b="${class_name}" -v c=41 'FNR==NR{print; next}{split(\$1, tmp, "."); OFS="\t"; print tmp[1], tmp[1], \$1, a, b, c}' ${template_txt} ${list_txt} > ${out_prefix}.txt
 
         """
     }
+
+    stub: 
+    """
+    touch ${out_prefix}.txt
+    """
 }

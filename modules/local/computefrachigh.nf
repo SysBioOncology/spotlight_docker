@@ -19,6 +19,8 @@ process COMPUTE_FRAC_HIGH {
     """
 
     stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
     """
     touch "${prefix}_frac_high_wide.csv"
     """

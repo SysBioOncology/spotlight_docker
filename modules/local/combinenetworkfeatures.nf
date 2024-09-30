@@ -26,6 +26,8 @@ process COMBINE_NETWORK_FEATURES {
 
 
     stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
     """
     touch "${prefix}_all_graph_features.csv"
     """

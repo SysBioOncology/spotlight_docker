@@ -18,4 +18,11 @@ process TILING_SINGLE_SLIDE {
         --filename_slide ${filename_slide}
 
     """
+
+    stub: 
+    """
+    touch ${slide_id}_tile_1.jpg
+    touch ${slide_id}_tile_1.jpg
+
+    """
 }

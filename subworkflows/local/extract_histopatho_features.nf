@@ -24,7 +24,7 @@ workflow EXTRACT_HISTOPATHO_FEATURES {
         clinical_files_input
         path_codebook
         class_name
-        out_file
+        out_prefix
         tumor_purity_threshold
         is_tcga
         image_dir
@@ -40,13 +40,13 @@ workflow EXTRACT_HISTOPATHO_FEATURES {
     main:
 
     CREATE_CLINICAL_FILE(
-        clinical_files_input = clinical_files_input,
-        class_name = class_name,
-        out_file = out_file,
-        path_codebook = path_codebook,
-        tumor_purity_threshold = tumor_purity_threshold,
-        is_tcga = is_tcga,
-        image_dir = image_dir
+        clinical_files_input,
+        class_name,
+        out_prefix,
+        path_codebook,
+        tumor_purity_threshold,
+        is_tcga,
+        image_dir
     )
     CREATE_LIST_AVAIL_SLIDES(
         clinical_file_path = CREATE_CLINICAL_FILE.out.txt,

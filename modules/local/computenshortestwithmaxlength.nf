@@ -26,4 +26,14 @@ process COMPUTE_N_SHORTEST_PATHS_WITH_MAX_LENGTH {
         --cutoff_path_length ${cutoff_path_length} \\
         --prefix ${prefix} ${graphs_path_arg} ${cell_types_arg}
     """
+
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_features_shortest_paths_thresholded.csv"
+    touch "${prefix}_features_shortest_paths_thresholded_wide.csv"
+    touch "${prefix}_graphs.pkl"
+    """
 }
+

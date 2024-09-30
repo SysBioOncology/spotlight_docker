@@ -14,7 +14,7 @@ include {   IMMUNEDECONV        } from '../modules/local/immunedeconv.nf'
 include { EXTRACT_HISTOPATHO_FEATURES } from '../subworkflows/local/extract_histopatho_features.nf'
 include { PREDICT_CELLTYPE_QUANTIFICATION_TILES} from '../subworkflows/local/predictcelltypequantificationtiles.nf'
 include { DERIVE_SPATIAL_FEATURES } from '../subworkflows/local/derive_spatial_features.nf'
-// include { CELLTYPE_QUANTIFICATION_BULKRNASEQ } from '../subworkflows/local/celltype_quantification_bulkrnaseq.nf'
+include { BUILD_MULTITASK_CELLTYPE_MODELS } from '../subworkflows/local/build_multi_task_celltype_models.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,59 +24,74 @@ include { DERIVE_SPATIAL_FEATURES } from '../subworkflows/local/derive_spatial_f
 
 workflow SPOTLIGHT {
     take:
-        // Subworkflows 
-        // skip_celltype_quantification_bulkrnaeq
-        // skip_build_multitask_cell_type_model
-        // skip_extract_histopatho_features 
-        // skip_PREDICT_CELLTYPE_QUANTIFICATION_TILES 
-        // skip_derive_spatial_features
-        // Parameters CELLTYPE_QUANTIFICATION_BULKRNASEQ
-        is_tpm
-        deconv_tools
-        gene_exp_path
-        quantiseq_path
-        mpc_counter_path
-        xcell_path
-        epic_path
-        
+    // General parameters
+    slide_type
+    out_prefix
 
-        // clinical_files_input
-        // path_codebook
-        // class_name
-        // out_file
-        // tumor_purity_threshold
-        // is_tcga
-        // image_dir
-        // gradient_mag_filter
-        // n_shards
-        // bot_out
-        // pred_out
-        // model_name
-        // checkpoint_path
-        // slide_type
-        // path_tissue_classes
-        // celltype_models
-        // var_names_path
-        // prediction_mode
-        // cell_types_path
-        // n_outerfolds
-        // out_prefix
-        // abundance_threshold
-        // shapiro_alpha
-        // cutoff_path_length
-        // n_clusters
-        // max_dist
-        // max_n_tiles_threshold
-        // tile_size
-        // overlap
-        // metadata_path
-        // merge_var
-        // sheet_name
+
+    // Immunedeconvolution
+    is_tpm
+    deconv_tools
+    gene_exp_path
+    quantiseq_path
+    mpc_counter_path
+    xcell_path
+    epic_path
+
+    // Extracting histopatho features
+    clinical_files_input
+    path_codebook
+    class_name
+    clinical_file_out_file
+    tumor_purity_threshold
+    is_tcga
+    image_dir
+    gradient_mag_filter
+    n_shards
+    bot_out
+    pred_out
+    model_name
+    checkpoint_path
+    path_tissue_classes
+
+    // Predicing tile-level cell type quantification
+    celltype_models
+    var_names_path
+    prediction_mode
+    cell_types_path
+
+    // Build multi-task cell type model(s)
+
+
+    // Spatial features
+    n_outerfolds
+    abundance_threshold
+    shapiro_alpha
+    cutoff_path_length
+    n_clusters
+    max_dist
+    max_n_tiles_threshold
+    tile_size
+    overlap
+    metadata_path
+    merge_var
+    sheet_name
 
     main:
     // Get spotlight modules to run
     def spotlight_modules = params.spotlight_modules ? params.spotlight_modules.split(',').collect{ it.trim().toLowerCase() } : []
 
+
+    // Initialize 
+    // If histopathofeatures run use output of the module, else user has to give path
+    histopatho_features_path = spotlight_modules.contains("extracthistopathofeatures") 
+    ? Channel.empty() 
+    : file(params.histopatho_features_path)
+
+    // If histopathofeatures is run, then use output, else user has to give
+    tile_level_cell_type_quantification_path = spotlight_modules.contains("extracthistopathofeatures")
+    ? Channel.empty() 
+    : file(params.tile_level_cell_type_quantification_path)
 
     // ch_immune_deconv_files =  Channel.of(  // channel: [tool name, csv]
     //         ["quantiseq", quantiseq_path],
@@ -91,47 +106,64 @@ workflow SPOTLIGHT {
 
         CREATE_TPM_MATRIX.out.txt.set { tpm_path }
         
+        // Immune deconvolution
+        Channel.of(                                 // channel: [tool name, csv]
+            ["quantiseq", quantiseq_path],
+            ["epic", epic_path],
+            ["mpc_counter", mpc_counter_path],
+            ["xcell", xcell_path],
+        )
+        .branch{
+            tool, filepath ->  
+            // Tools to use for deconvolution 
+            invalid: deconv_tools.contains(tool) && (filepath.name == "NO_FILE")
+                return [tool, tpm_path]
+            // Tools already used
+            valid: true
+                return [tool, filepath]
+        }.set {
+            ch_immune_deconv_files
+        }
 
-        // // Immune deconvolution
-        // Channel.of(                                 // channel: [tool name, csv]
-        //     ["quantiseq", quantiseq_path],
-        //     ["epic", epic_path],
-        //     ["mpc_counter", mpc_counter_path],
-        //     ["xcell", xcell_path],
-        // )
-        // .branch{
-        //     tool, filepath ->  
-        //     // Tools to use for deconvolution 
-        //     invalid: deconv_tools.contains(tool) && (filepath.name == "NO_FILE")
-        //         return [tool, tpm_path]
-        //     // Tools already used
-        //     valid: true
-        //         return [tool, filepath]
-        // }.set {
-        //     ch_immune_deconv_files
-        // }
-
-        // IMMUNEDECONV (
-        //     ch_immune_deconv_files.invalid
-        // )
+        IMMUNEDECONV (
+            ch_immune_deconv_files.invalid
+        )
         
         
-        // IMMUNEDECONV.out.csv
-        // .collect()
-        // .mix(ch_immune_deconv_files.valid)
-        // .toSortedList()
-        // .set { immune_deconv_files }
+        IMMUNEDECONV.out.csv
+        .collect()
+        .mix(ch_immune_deconv_files.valid)
+        .toSortedList()
+        .set { immune_deconv_files }
 
+        immune_deconv_files.view()
 
-        // immune_deconv_files.view()
     }
+
+
+    // if (spotlight_modules.contains("")) {
+    //     BUILD_MULTITASK_CELLTYPE_MODELS(
+    //         cancer_type = class_name,
+    //         immune_deconv_files,
+    //         clinical_file_path,
+    //         thorsson_signatures_path,
+    //         estimate_signatures_path,
+    //         absolute_tumor_purity_path,
+    //         gibbons_signatures_path,
+    //         tpm_path
+
+
+
+
+    //     )
+    // }
 
     if (spotlight_modules.contains("extracthistopathofeatures")) {
         EXTRACT_HISTOPATHO_FEATURES(
             clinical_files_input,
             path_codebook,
             class_name,
-            out_file,
+            out_prefix,
             tumor_purity_threshold,
             is_tcga,
             image_dir,
@@ -144,24 +176,28 @@ workflow SPOTLIGHT {
             slide_type,
             path_tissue_classes
         )
+        EXTRACT_HISTOPATHO_FEATURES.out.features.set { histopatho_features_path }
     }
 
     if (spotlight_modules.contains('predictcelltypequantificationtiles')) {
 
         PREDICT_CELLTYPE_QUANTIFICATION_TILES(
-            features_input  = EXTRACT_HISTOPATHO_FEATURES.out.features,
-            celltype_models = celltype_models,
-            var_names_path = var_names_path,
-            prediction_mode = prediction_mode,
-            cell_types_path = cell_types_path,
-            n_outerfolds =  n_outerfolds,
-            slide_type = slide_type
+            features_input          = histopatho_features_path,
+            celltype_models,
+            var_names_path,
+            prediction_mode,
+            cell_types_path,
+            n_outerfolds,
+            slide_type,
         )
+
+        PREDICT_CELLTYPE_QUANTIFICATION_TILES.out.proba.set {tile_level_cell_type_quantification_path}
     }
+
 
     if (spotlight_modules.contains('derivespatialfeatures')) {
         DERIVE_SPATIAL_FEATURES(
-            tile_level_cell_type_quantification = PREDICT_CELLTYPE_QUANTIFICATION_TILES.out.proba,
+            tile_level_cell_type_quantification = tile_level_cell_type_quantification_path,
             out_prefix = out_prefix,
             slide_type = slide_type,
             abundance_threshold = abundance_threshold,
@@ -175,8 +211,8 @@ workflow SPOTLIGHT {
             overlap = overlap,
             metadata_path = metadata_path,
             is_tcga = is_tcga,
-            merge_var = merge_var,
-            sheet_name = sheet_name
+            merge_var,
+            sheet_name
         ) 
     }
 

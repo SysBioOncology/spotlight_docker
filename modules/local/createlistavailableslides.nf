@@ -17,4 +17,12 @@ process CREATE_LIST_AVAIL_SLIDES {
 
     """
 
+    stub: 
+    """
+    echo slide_id,slide_filename > "avail_slides_for_img.csv"
+    echo slide_id1,slide1.svs >> "avail_slides_for_img.csv"
+    echo slide_id2,slide2.svs >> "avail_slides_for_img.csv"
+
+    """
+
 }

@@ -67,50 +67,58 @@ workflow NFCORE_SPOTLIGHT {
 
 
     SPOTLIGHT (
+        // General parameters
+        params.slide_type,
+        params.out_prefix,
+
+
+        // Immunedeconvolution
         params.is_tpm,
         params.deconv_tools,
         gene_exp_path,
         quantiseq_path,
         mpc_counter_path,
         xcell_path,
-        epic_path
-        // clinical_files_input,
-        // path_codebook,
-        // params.class_name,
-        // params.clinical_file_out_file,
-        // params.tumor_purity_threshold,
-        // params.is_tcga,
-        // image_dir,
-        // params.gradient_mag_filter,
-        // params.n_shards,
-        // params.bot_out,
-        // params.pred_out,
-        // params.model_name,
-        // checkpoint_path,
-        // params.slide_type,
-        // path_tissue_classes,
-        // celltype_models,
-        // var_names_path,
-        // params.prediction_mode,
-        // cell_types_path,
-        // params.n_outerfolds,
-        // params.out_prefix,
-        // params.abundance_threshold,
-        // params.shapiro_alpha,
-        // params.cutoff_path_length,
-        // params.n_clusters,
-        // params.max_dist,
-        // params.max_n_tiles_threshold,
-        // params.tile_size,
-        // params.overlap,
-        // metadata_path,
-        // params.merge_var,
-        // params.sheet_name
-        // tpm_path, 
-        // params.skip_quantiseq,
-        // params.skip_mpc_counter,
-        // params.skip_xcell,
-        // params.skip_epic
+        epic_path,
+
+        // Extracting histopatho features
+        clinical_files_input,
+        path_codebook,
+        params.class_name,
+        params.clinical_file_out_file,
+        params.tumor_purity_threshold,
+        params.is_tcga,
+        image_dir,
+        params.gradient_mag_filter,
+        params.n_shards,
+        params.bot_out,
+        params.pred_out,
+        params.model_name,
+        checkpoint_path,
+        path_tissue_classes,
+
+        // Predicing tile-level cell type quantification
+        celltype_models,
+        var_names_path,
+        params.prediction_mode,
+        cell_types_path,
+
+        // Build multi-task cell type model(s)
+
+
+        // Spatial features
+        params.n_outerfolds,
+        params.abundance_threshold,
+        params.shapiro_alpha,
+        params.cutoff_path_length,
+        params.n_clusters,
+        params.max_dist,
+        params.max_n_tiles_threshold,
+        params.tile_size,
+        params.overlap,
+        metadata_path,
+        params.merge_var,
+        params.sheet_name
     )
 
 }

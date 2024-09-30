@@ -25,6 +25,8 @@ process COMBINE_CLUSTERING_FEATURES {
     """
 
     stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
     """
     touch "${prefix}_clustering_features.csv"
     """

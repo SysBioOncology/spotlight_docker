@@ -17,4 +17,13 @@ process PREPROCESSING_SLIDES {
         --N_shards ${n_shards}\
     """
 
+
+    stub: 
+    """
+
+    touch "images_train_00001-of-00${n_shards}.tfrecord"
+    touch "images_train_00${n_shards}-of-00${n_shards}.tfrecord"
+
+    """
+
 }

@@ -6,7 +6,7 @@ process PREPROCESSING_MULTITASK_MODEL_TARGET_FEATURES {
     path estimate_signatures_path
     path absolute_tumor_purity_path
     path gibbons_signatures_path
-    path mcp_counter_path
+    tuple mcp_counter_path
     path quantiseq_path
     path xcell_path
     path epic_path

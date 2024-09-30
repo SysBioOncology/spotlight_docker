@@ -8,31 +8,28 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // */
 
-include { TRAIN_MULTITASK_CELLTYPE_MODEL} from '../../modules/local/trainmultitaskcelltypemodel.nf'
+include { BUILD_MULTITASK_CELLTYPE_MODEL} from '../../modules/local/buildmultitaskcelltypemodel.nf'
 include { PREPROCESSING_MULTITASK_MODEL_TARGET_FEATURES} from '../../modules/local/preprocessingmultitaskmodeltargetfeatures.nf'
 
-workflow TRAIN_MULTITASK_CELLTYPE_MODELS {
+workflow BUILD_MULTITASK_CELLTYPE_MODELS {
     take: 
     // Target features
     cancer_type
-    quantiseq_path
-    mpc_counter_path
-    xcell_path
-    epic_path
+    immune_deconv_files
 
     // Train multitask model
-    bottleneck_features_path
-    category
-    alpha_min
-    alpha_max
-    n_steps
-    n_outerfolds
-    n_innerfolds
-    n_tilescancer_type
-    split_level
-    slide_type
-    var_names_path
-    target_features_path
+    // bottleneck_features_path
+    // category
+    // alpha_min
+    // alpha_max
+    // n_steps
+    // n_outerfolds
+    // n_innerfolds
+    // n_tilescancer_type
+    // split_level
+    // slide_type
+    // var_names_path
+    // target_features_path
 
     clinical_file_path
     tpm_path 

@@ -28,6 +28,8 @@ process COMPUTE_COLOCALIZATION {
     """
 
     stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
     """
     touch "${prefix}_features_coloc_fraction_wide.csv"
     touch "${prefix}_features_coloc_fraction.csv"

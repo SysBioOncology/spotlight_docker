@@ -19,4 +19,11 @@ process COMPUTE_PROXIMITY_FROM_INDIV_SCHC_COMBINE {
         --prox_within ${prox_within} \\
         --prefix ${prefix}
     """
+
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_features_clust_indiv_schc_prox.csv"
+    """
 }

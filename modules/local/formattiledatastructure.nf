@@ -21,4 +21,8 @@ process FORMAT_TILE_DATA_STRUCTURE {
         --clin_path ${clinical_file_path}
     """
 
+    stub: 
+    """
+    touch "file_info_train.txt"
+    """
 }

@@ -28,6 +28,8 @@ process CLUSTERING_SCHC_INDIVIDUAL {
 
 
     stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
     """
     touch "${prefix}_indiv_schc_tiles_raw.csv"
     touch "${prefix}_indiv_schc_clusters_labeled.csv"
