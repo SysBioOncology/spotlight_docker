@@ -31,4 +31,11 @@ process COMPUTE_PROXIMITY_FROM_INDIV_SCHC_WITHIN {
         --overlap ${overlap} \\
         --prefix ${prefix} ${cell_types_arg} ${max_dist_arg}
     """
+
+    stub:
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_features_clust_indiv_schc_prox_within.csv"
+    """
 }

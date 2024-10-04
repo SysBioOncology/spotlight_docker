@@ -19,4 +19,11 @@ process COMPUTE_NCLUSTERS {
         --all_slide_clusters_characterized ${tiles_labeled} \\
         --prefix ${prefix} ${cell_types_arg}
     """
+
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_nclusters_wide.csv"
+    """
 }

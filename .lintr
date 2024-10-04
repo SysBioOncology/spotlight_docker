@@ -1,0 +1,10 @@
+linters: linters_with_defaults(
+    object_usage_linter(
+        interpret_glue = TRUE
+        ),
+    object_name_linter = NULL, 
+    indentation_linter(
+        indent = 4L
+    ),
+    commented_code_linter=NULL
+    )

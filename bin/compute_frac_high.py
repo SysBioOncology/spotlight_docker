@@ -1,40 +1,49 @@
 #!/usr/bin/env python3
-import os
-import pandas as pd
 import argparse
+import os
+import time
+from argparse import ArgumentParser as AP
+from os.path import abspath
+from pathlib import Path
 
 # Own modules
 import features.features as features
+import pandas as pd
 
-
-from argparse import ArgumentParser as AP
-from os.path import abspath
-import time
-from pathlib import Path
 
 def get_args():
-      # Script description
+    # Script description
     description = """Compute Clustering Features"""
 
     # Add parser
-    parser = AP(description=description,
-                formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--slide_indiv_clusters_labeled", type=str,
-                        help="Path to csv file", required=True)
-    parser.add_argument("--output_dir", type=str,
-                        help="Path to output folder to store generated files", required=False, default = "")
-    parser.add_argument("--prefix", type=str,
-                        help="Prefix for output file", default="")
+    parser = AP(
+        description=description, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--slide_indiv_clusters_labeled",
+        type=str,
+        help="Path to csv file",
+        required=True,
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        help="Path to output folder to store generated files",
+        required=False,
+        default="",
+    )
+    parser.add_argument("--prefix", type=str, help="Prefix for output file", default="")
     parser.add_argument("--version", action="version", version="0.1.0")
     arg = parser.parse_args()
     arg.output_dir = abspath(arg.output_dir)
 
-    if ((arg.output_dir != "") & (not os.path.isdir(arg.output_dir))):
+    if (arg.output_dir != "") & (not os.path.isdir(arg.output_dir)):
         # Create an empty folder for TF records if folder doesn't exist
-        arg.output_dir = Path(arg.output_dir,"process_train")
+        arg.output_dir = Path(arg.output_dir, "process_train")
         os.mkdir(arg.output_dir)
 
     return arg
+
 
 def compute_frac_high(slide_indiv_clusters_labeled):
     """
@@ -55,20 +64,26 @@ def compute_frac_high(slide_indiv_clusters_labeled):
 
     frac_high_sub = frac_high[frac_high["is_high"]].copy()
     frac_high_sub = frac_high_sub.drop(
-        columns=["is_high", "n_clusters", "n_total_clusters"])
+        columns=["is_high", "n_clusters", "n_total_clusters"]
+    )
 
-    frac_high_wide = frac_high_sub.pivot(index=["slide_submitter_id"], columns=[
-                                         "cell_type_map"])["fraction"]
-    new_cols = [('fraction {0} clusters labeled high'.format(col))
-                for col in frac_high_wide.columns]
+    frac_high_wide = frac_high_sub.pivot(
+        index=["slide_submitter_id"], columns=["cell_type_map"]
+    )["fraction"]
+    new_cols = [
+        ("fraction {0} clusters labeled high".format(col))
+        for col in frac_high_wide.columns
+    ]
     frac_high_wide.columns = new_cols
     frac_high_wide = frac_high_wide.sort_index(axis="columns").reset_index()
     return frac_high_wide
 
+
 def main(args):
     compute_frac_high(
-          slide_indiv_clusters_labeled = args.slide_indiv_clusters_labeled).to_csv(
-        Path(args.output_dir, f"{args.prefix}_frac_high_wide.csv", index = False))
+        slide_indiv_clusters_labeled=args.slide_indiv_clusters_labeled
+    ).to_csv(Path(args.output_dir, f"{args.prefix}_frac_high_wide.csv", index=False))
+
 
 if __name__ == "__main__":
     args = get_args()

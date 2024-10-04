@@ -1,16 +1,7 @@
-# Necessary for computing Fges scores
-import os
-import sys
 import numpy as np
 import pandas as pd
-import git
-REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
-
-sys.path.append(f"{REPO_DIR}/Python/libs")
-# trunk-ignore(flake8/E402)
 from MFP.portraits.utils import median_scale, read_gene_sets, ssgsea_formula
 
-REPO_DIR= git.Repo('.', search_parent_directories=True).working_tree_dir
 
 def process_immunedeconv(data, method, return_all_features=False):
     def format(data, method):
@@ -25,12 +16,11 @@ def process_immunedeconv(data, method, return_all_features=False):
         """
         if (method == "EPIC") | (method == "quanTIseq"):
             data = data.T
-            data = data.set_axis(data.index.str.replace(".", "-", regex=True), axis=0)
+            data = data.set_axis(data.index.str.replace("\\.", "-", regex=True), axis=0)
 
         elif (method == "xCell") | (method == "MCP"):
-            data = data.set_index("cell_type")
             data = data.T
-            data = data.set_axis(data.index.str.replace(".", "-", regex=True), axis=0)
+            data = data.set_axis(data.index.str.replace("\\.", "-", regex=True), axis=0)
             data = data.rename_axis(None, axis=1)
         data.index.name = "TCGA_sample"
         return data
@@ -44,7 +34,8 @@ def process_immunedeconv(data, method, return_all_features=False):
             data: dataframe with selected tasks defined by investigation of correlations using initial (large) set of tasks
         """
         if method == "quanTIseq":
-            data = data.rename(columns={"T.cells.CD8": "CD8 T cells (quanTIseq)"})
+            # Renaming
+            data = data.rename(columns={"T cell CD8+": "CD8 T cells (quanTIseq)"})
             return pd.DataFrame(data.loc[:, "CD8 T cells (quanTIseq)"])
         elif method == "EPIC":
             data = data.rename(
@@ -88,8 +79,8 @@ def add_suffix_to_featurename(data, method):
 
 
 def compute_gene_signature_scores(
-    tpm_path,
-    gmt_signatures_path=f"{REPO_DIR}/Python/libs/MFP/signatures/gene_signatures.gmt",
+    tpm_path: str,
+    gmt_signatures_path: str,
 ):
     """
     Re(computing) gene signature scores for Fges Bagaev
@@ -105,7 +96,7 @@ def compute_gene_signature_scores(
     gmt = read_gene_sets(gmt_signatures_path)  # GMT format like in MSIGdb
 
     # Read expressions
-    tpm = pd.read_csv(tpm_path, sep="\t")
+    tpm = pd.read_csv(tpm_path, sep="\t", index_col=0, engine="pyarrow")
     tpm_log_transformed = np.log2(tpm + 1)
 
     # Calc signature scores
@@ -115,7 +106,7 @@ def compute_gene_signature_scores(
     return median_scale(signature_scores)
 
 
-def clean_data(bottleneck_features, target_features, slide_type):
+def clean_data(bottleneck_features, target_features, slide_type: str):
     """
     Merge histopathological features with the tasks (quantification methods) for TCGA data
 
@@ -136,14 +127,17 @@ def clean_data(bottleneck_features, target_features, slide_type):
         all_features = all_features.dropna(axis=0, how="any")
 
     elif slide_type == "FFPE":
-        all_features = bottleneck_features.map_partitions(lambda x: pd.merge(
-            x,
-            target_features,
-            how="inner",
-            on=["sample_submitter_id", "slide_submitter_id"]
+        all_features = bottleneck_features.map_partitions(
+            lambda x: pd.merge(
+                x,
+                target_features,
+                how="inner",
+                on=["sample_submitter_id", "slide_submitter_id"],
             )
         )
         all_features = all_features.map_partitions(lambda x: x.drop_duplicates())
-        all_features = all_features.map_partitions(lambda x: x.dropna(axis=0, how="any"))
+        all_features = all_features.map_partitions(
+            lambda x: x.dropna(axis=0, how="any")
+        )
 
     return all_features

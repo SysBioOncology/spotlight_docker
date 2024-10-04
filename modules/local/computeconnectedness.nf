@@ -25,4 +25,12 @@ process COMPUTE_CONNECTEDNESS {
         --n_cores ${task.cpus} \\
         --prefix ${prefix} ${graphs_path_arg} ${cell_types_arg}
     """
+
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_features_lcc_fraction_wide.csv"
+    touch "${prefix}_graphs.pkl"
+    """
 }

@@ -37,7 +37,7 @@ data_example/
 output/
 assets/checkpoint
 assets/codebook.txt
-asse
+assets/local
 
 spotlight.sif
 plugins/*
@@ -53,3 +53,11 @@ ARCHIVE
 
 gaitilab.config
 nf_run_spotlight.sh
+
+.fuse_hidden*
+
+
+nf-params-tcga.yml
+nf-params-xenium.yml
+
+scratch.ipynb

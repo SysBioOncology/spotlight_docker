@@ -14,7 +14,7 @@ RUN apt-get update && \
     apt-get install -y python-dev && \
     apt-get install -y libhdf5-dev && \
     apt-get install -y libblosc-dev
-    
+
 
 # Set up python environment #
 RUN apt install python3.8-venv
@@ -34,4 +34,6 @@ RUN pip3 install --default-timeout=900 -r env_requirements.txt
 
 ENV PATH="nf-bin:${PATH}"
 
+
+# "omnideconv/immunedeconv"
 

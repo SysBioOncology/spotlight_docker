@@ -17,4 +17,11 @@ process COMPUTE_FRAC_HIGH {
         --slide_indiv_clusters_labeled ${tiles_labeled} \\
         --prefix ${prefix}
     """
+
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_frac_high_wide.csv"
+    """
 }

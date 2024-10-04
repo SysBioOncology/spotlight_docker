@@ -1,44 +1,57 @@
 #!/usr/bin/env python3
 import argparse
-from argparse import ArgumentParser as AP
 import os
-import pandas as pd
-from os.path import abspath
 import time
+from argparse import ArgumentParser as AP
+from os.path import abspath
 from pathlib import Path
+
+import pandas as pd
+
 
 def get_args():
     # Script description
     description = """Combine all network Features"""
 
     # Add parser
-    parser = AP(description=description,
-                formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--all_largest_cc_sizes_wide", type=str,
-                        help="Path to csv file ", required=True)
-    parser.add_argument("--shortest_paths_wide", type=str,
-                    help="Path to csv file ", required=True)
-    parser.add_argument("--colocalization_wide", type=str,
-                        help="Path to csv file ", required=True)
+    parser = AP(
+        description=description, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--all_largest_cc_sizes_wide", type=str, help="Path to csv file ", required=True
+    )
+    parser.add_argument(
+        "--shortest_paths_wide", type=str, help="Path to csv file ", required=True
+    )
+    parser.add_argument(
+        "--colocalization_wide", type=str, help="Path to csv file ", required=True
+    )
 
-    parser.add_argument("--output_dir", type=str,
-                        help="Path to output folder to store generated files", required=False, default = "")
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        help="Path to output folder to store generated files",
+        required=False,
+        default="",
+    )
 
-    parser.add_argument("--prefix", type=str,
-                        help="Prefix for output file", default="")
+    parser.add_argument("--prefix", type=str, help="Prefix for output file", default="")
 
     parser.add_argument("--version", action="version", version="0.1.0")
     arg = parser.parse_args()
     arg.output_dir = abspath(arg.output_dir)
 
-    if ((arg.output_dir != "") & (not os.path.isdir(arg.output_dir))):
+    if (arg.output_dir != "") & (not os.path.isdir(arg.output_dir)):
         # Create an empty folder for TF records if folder doesn't exist
-        arg.output_dir = Path(arg.output_dir,"process_train")
+        arg.output_dir = Path(arg.output_dir, "process_train")
         os.mkdir(arg.output_dir)
 
     return arg
 
-def combine_network_features(all_largest_cc_sizes_wide, shortest_paths_wide, colocalization_wide):
+
+def combine_network_features(
+    all_largest_cc_sizes_wide, shortest_paths_wide, colocalization_wide
+):
     """
     Compute network features
     1. effect sizes based on difference in node degree between simulated slides and actual slide
@@ -64,18 +77,25 @@ def combine_network_features(all_largest_cc_sizes_wide, shortest_paths_wide, col
         all_dual_nodes_frac (DataFrame): dataframe containing slide_submitter_id, pair, counts (absolute) and frac
 
     """
-    all_largest_cc_sizes_wide = pd.read_csv(all_largest_cc_sizes_wide, index_col = False, sep = "\t")
-    shortest_paths_wide = pd.read_csv(shortest_paths_wide, index_col = False, sep = "\t")
-    colocalization_wide = pd.read_csv(colocalization_wide, index_col = False, sep = "\t")
-
+    all_largest_cc_sizes_wide = pd.read_csv(
+        all_largest_cc_sizes_wide, index_col=False, sep="\t"
+    )
+    shortest_paths_wide = pd.read_csv(shortest_paths_wide, index_col=False, sep="\t")
+    colocalization_wide = pd.read_csv(colocalization_wide, index_col=False, sep="\t")
 
     all_features = pd.merge(all_largest_cc_sizes_wide, shortest_paths_wide)
     all_features = pd.merge(all_features, colocalization_wide)
-    return (all_features)
+    return all_features
+
 
 def main(args):
-    combine_network_features(args.all_largest_cc_sizes_wide, args.shortest_paths_wide, args.colocalization_wide
-    ).to_csv(Path(args.output_dir, f"{args.prefix}_all_graph_features.csv"), index = False)
+    combine_network_features(
+        args.all_largest_cc_sizes_wide,
+        args.shortest_paths_wide,
+        args.colocalization_wide,
+    ).to_csv(
+        Path(args.output_dir, f"{args.prefix}_all_graph_features.csv"), index=False
+    )
 
 
 if __name__ == "__main__":

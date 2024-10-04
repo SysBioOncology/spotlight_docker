@@ -1,30 +1,33 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import pandas as pd
+import time
 from argparse import ArgumentParser as AP
 from os.path import abspath
-import time
 from pathlib import Path
+
+import pandas as pd
+
 
 def get_args():
     # Script description
     description = """Creating list of available slide images that have to be tiled"""
 
     # Add parser
-    parser = AP(description=description,
-                formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = AP(
+        description=description, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--slides_folder", help="Set slides folder", default = None)
-    parser.add_argument("--output_dir", help="Set output folder", default = "")
+    parser.add_argument("--slides_folder", help="Set slides folder", default=None)
+    parser.add_argument("--output_dir", help="Set output folder", default="")
     parser.add_argument("--clinical_file_path", help="Set clinical file path")
     parser.add_argument("--version", action="version", version="0.1.0")
     arg = parser.parse_args()
     arg.output_dir = abspath(arg.output_dir)
     arg.slides_folder = abspath(arg.slides_folder)
 
-    if ((arg.output_dir != "") & (not os.path.isdir(arg.output_dir))):
+    if (arg.output_dir != "") & (not os.path.isdir(arg.output_dir)):
         os.mkdir(arg.output_dir)
     return arg
 
@@ -59,17 +62,21 @@ def create_list_avail_img_for_tiling(slides_folder, clinical_file_path):
     print(available_images)
     images_for_tiling = list(set(subset_images) & set(available_images))
 
-    return(pd.DataFrame([[name.split(".")[0], name] for name in images_for_tiling], columns=["slide_id", "slide_filename"]))
+    return pd.DataFrame(
+        [[name.split(".")[0], name] for name in images_for_tiling],
+        columns=["slide_id", "slide_filename"],
+    )
 
 
 def main(args):
-    list_avail_img = create_list_avail_img_for_tiling(slides_folder=args.slides_folder,
-                                    clinical_file_path=args.clinical_file_path)
+    list_avail_img = create_list_avail_img_for_tiling(
+        slides_folder=args.slides_folder, clinical_file_path=args.clinical_file_path
+    )
 
-    list_avail_img.to_csv(Path(args.output_dir, "avail_slides_for_img.csv"), index=False)
+    list_avail_img.to_csv(
+        Path(args.output_dir, "avail_slides_for_img.csv"), index=False
+    )
     print("Generated list of available images for tiling...")
-
-
 
 
 if __name__ == "__main__":

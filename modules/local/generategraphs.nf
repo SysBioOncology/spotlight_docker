@@ -20,4 +20,11 @@ process GENERATE_GRAPHS {
         --prefix ${prefix} \\
         --slide_type ${slide_type}
     """
+
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_graphs.pkl"
+    """
 }

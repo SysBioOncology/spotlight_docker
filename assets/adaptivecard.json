@@ -17,7 +17,7 @@
                         "size": "Large",
                         "weight": "Bolder",
                         "color": "<% if (success) { %>Good<% } else { %>Attention<%} %>",
-                        "text": "nf-core/spotlight v${version} - ${runName}",
+                        "text": "SysBioOncology/spotlight_docker v${version} - ${runName}",
                         "wrap": true
                     },
                     {

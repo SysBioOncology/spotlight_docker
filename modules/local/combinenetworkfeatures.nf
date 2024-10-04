@@ -23,4 +23,12 @@ process COMBINE_NETWORK_FEATURES {
         --colocalization_wide ${colocalization_wide} \\
         --prefix ${prefix}
     """
+
+
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_all_graph_features.csv"
+    """
 }

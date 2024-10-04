@@ -33,4 +33,10 @@ process COMBINE_ALL_SPATIAL_FEATURES {
 
     """
 
+    stub: 
+    prefix = out_prefix != "dummy" ? "${out_prefix}${slide_type}" : "${slide_type}"
+
+    """
+    touch "${prefix}_all_features_combined.csv"
+    """
 }
