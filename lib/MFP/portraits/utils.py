@@ -12,7 +12,7 @@ class GeneSet:
         self.genes_ordered = list(genes)
 
     def __str__(self):
-        return '{}\t{}\t{}'.format(self.name, self.descr, '\t'.join(self.genes))
+        return "{}\t{}\t{}".format(self.name, self.descr, "\t".join(self.genes))
 
 
 def read_gene_sets(gmt_file):
@@ -25,7 +25,7 @@ def read_gene_sets(gmt_file):
     gene_sets = {}
     with open(gmt_file) as handle:
         for line in handle:
-            items = line.strip().split('\t')
+            items = line.strip().split("\t")
             name = items[0].strip()
             description = items[1].strip()
             genes = {gene.strip() for gene in items[2:]}
@@ -39,10 +39,12 @@ def ssgsea_score(ranks, genes):
     if not len(common_genes):
         return pd.Series([0] * len(ranks.columns), index=ranks.columns)
     sranks = ranks.loc[common_genes]
-    return (sranks ** 1.25).sum() / (sranks ** 0.25).sum() - (len(ranks.index) - len(common_genes) + 1) / 2
+    return (sranks**1.25).sum() / (sranks**0.25).sum() - (
+        len(ranks.index) - len(common_genes) + 1
+    ) / 2
 
 
-def ssgsea_formula(data, gene_sets, rank_method='max'):
+def ssgsea_formula(data, gene_sets, rank_method="max"):
     """
     Return DataFrame with ssgsea scores
     Only overlapping genes will be analyzed
@@ -53,22 +55,35 @@ def ssgsea_formula(data, gene_sets, rank_method='max'):
     :return: pd.DataFrame, ssgsea scores, index - genesets, columns - patients
     """
 
-    ranks = data.rank(method=rank_method, na_option='bottom')
+    ranks = data.rank(method=rank_method, na_option="bottom")
 
-    return pd.DataFrame({gs_name: ssgsea_score(ranks, gene_sets[gs_name].genes)
-                         for gs_name in list(gene_sets.keys())})
+    return pd.DataFrame(
+        {
+            gs_name: ssgsea_score(ranks, gene_sets[gs_name].genes)
+            for gs_name in list(gene_sets.keys())
+        }
+    )
 
 
 def median_scale(data, clip=None):
-    c_data = (data - data.median()) / data.mad()
+    # Deprecated in future versions (`data.mad()`):
+    # c_data = (data - data.median()) / data.mad()
+    # New:
+    c_data = (data - data.median()) / ((data - data.mean()).abs().mean())
     if clip is not None:
         return c_data.clip(-clip, clip)
     return c_data
 
 
-def read_dataset(file, sep='\t', header=0, index_col=0, comment=None):
-    return pd.read_csv(file, sep=sep, header=header, index_col=index_col,
-                       na_values=['Na', 'NA', 'NAN'], comment=comment)
+def read_dataset(file, sep="\t", header=0, index_col=0, comment=None):
+    return pd.read_csv(
+        file,
+        sep=sep,
+        header=header,
+        index_col=index_col,
+        na_values=["Na", "NA", "NAN"],
+        comment=comment,
+    )
 
 
 def item_series(item, indexed=None):
@@ -79,7 +94,7 @@ def item_series(item, indexed=None):
     :return:
     """
     if indexed is not None:
-        if hasattr(indexed, 'index'):
+        if hasattr(indexed, "index"):
             return pd.Series([item] * len(indexed), index=indexed.index)
         elif type(indexed) is int and indexed > 0:
             return pd.Series([item] * indexed, index=np.arange(indexed))
@@ -97,11 +112,11 @@ def to_common_samples(df_list=()):
         cs = cs.intersection(df_list[i].index)
 
     if len(cs) < 1:
-        warnings.warn('No common samples!')
+        warnings.warn("No common samples!")
     return [df_list[i].loc[list(cs)] for i in range(len(df_list))]
 
 
-def cut_clustermap_tree(g, n_clusters=2, by_cols=True, name='Clusters'):
+def cut_clustermap_tree(g, n_clusters=2, by_cols=True, name="Clusters"):
     """
     Cut clustermap into desired number of clusters. See scipy.cluster.hierarchy.cut_tree documentation.
     :param g:
@@ -111,6 +126,7 @@ def cut_clustermap_tree(g, n_clusters=2, by_cols=True, name='Clusters'):
     :return: pd.Series
     """
     from scipy.cluster.hierarchy import cut_tree
+
     if by_cols:
         link = g.dendrogram_col.linkage
         index = g.data.columns
@@ -118,7 +134,10 @@ def cut_clustermap_tree(g, n_clusters=2, by_cols=True, name='Clusters'):
         link = g.dendrogram_row.linkage
         index = g.data.index
 
-    return pd.Series(cut_tree(link, n_clusters=n_clusters)[:, 0], index=index, name=name) + 1
+    return (
+        pd.Series(cut_tree(link, n_clusters=n_clusters)[:, 0], index=index, name=name)
+        + 1
+    )
 
 
 def pivot_vectors(vec1, vec2, na_label_1=None, na_label_2=None):
@@ -135,18 +154,17 @@ def pivot_vectors(vec1, vec2, na_label_1=None, na_label_2=None):
 
     name1 = str(vec1.name)
     if vec1.name is None:
-        name1 = 'V1'
+        name1 = "V1"
 
     name2 = str(vec2.name)
     if vec2.name is None:
-        name2 = 'V2'
+        name2 = "V2"
 
     if name1 == name2:
-        name1 += '_1'
-        name2 += '_2'
+        name1 += "_1"
+        name2 += "_2"
 
-    sub_df = pd.DataFrame({name1: vec1,
-                           name2: vec2})
+    sub_df = pd.DataFrame({name1: vec1, name2: vec2})
     # FillNAs
     fill_dict = {}
     if na_label_1 is not None:
@@ -157,5 +175,8 @@ def pivot_vectors(vec1, vec2, na_label_1=None, na_label_2=None):
 
     sub_df = sub_df.assign(N=item_series(1, sub_df))
 
-    return pd.pivot_table(data=sub_df, columns=name1,
-                          index=name2, values='N', aggfunc=sum).fillna(0).astype(int)
+    return (
+        pd.pivot_table(data=sub_df, columns=name1, index=name2, values="N", aggfunc=sum)
+        .fillna(0)
+        .astype(int)
+    )

@@ -10,14 +10,16 @@ process CREATE_CLINICAL_FILE {
     val tumor_purity_threshold
     val is_tcga
     path image_dir
+    val slide_type
 
     output:
     path "${out_prefix}.txt", emit: txt
 
     script:
     def args   = task.ext.args   ?: ''
-    def missing_clinical_file = clinical_files_input.name == 'NO_FILE'
-    if (is_tcga | !missing_clinical_file ) {
+    out_prefix = task.ext.prefix ? task.ext.prefix : out_prefix
+
+    if ((is_tcga && slide_type == "FF")) {
         """
         create_clinical_file.py \\
             --class_name ${class_name} \\

@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
-# Module imports
-import os
 import argparse
+import multiprocessing
+import os
+import time
+from argparse import ArgumentParser as AP
+from os.path import abspath
+from pathlib import Path
+
 import joblib
+import model.preprocessing as preprocessing
 import numpy as np
 import pandas as pd
-
-import model.preprocessing as preprocessing
 from model.constants import (
-    TUMOR_PURITY,
-    T_CELLS,
-    ENDOTHELIAL_CELLS,
     CAFS,
+    ENDOTHELIAL_CELLS,
     IDS,
+    T_CELLS,
     TILE_VARS,
+    TUMOR_PURITY,
 )
-
-from os.path import abspath
-import time
-from pathlib import Path
-import multiprocessing
-from argparse import ArgumentParser as AP
 
 
 def get_args():
@@ -59,7 +57,69 @@ def get_args():
     parser.add_argument("--tpm_path", help="Path to tpm file", type=str, required=True)
 
     parser.add_argument(
-        "--output_dir", help="Path to folder for generated file", default=""
+        "--mfp_gene_signatures_path",
+        type=str,
+        default="assets/gene_signatures.gmt",
+        help="Path to gmt file with gene signatures for MFP",
+    )
+
+    published_scores_args = parser.add_argument_group("Published scores")
+
+    published_scores_args.add_argument(
+        "--thorsson_scores_path",
+        type=str,
+        default="assets/Thorsson_Scores_160_Signatures.tsv",
+        help="Path to Thorsson scores",
+    )
+
+    published_scores_args.add_argument(
+        "--estimate_scores_path",
+        type=str,
+        default="Yoshihara_ESTIMATE_XXX_RNAseqV2.txt",
+        help="Path to ESTIMATE scores",
+    )
+
+    published_scores_args.add_argument(
+        "--absolute_tumor_purity_path",
+        type=str,
+        default="ABSOLUTE_tumor_purity.txt",
+        help="Path to ABSOLUTE tumor purity file",
+    )
+
+    published_scores_args.add_argument(
+        "--gibbons_scores_path",
+        type=str,
+        default="Gibbons_supp1.xslx",
+        help="Path to Supplementary Excel file from Gibbons et al.",
+    )
+
+    deconv_args = parser.add_argument_group("bulkRNAseq deconvolution")
+    deconv_args.add_argument(
+        "--mcp_counter_path",
+        type=str,
+        default="mcp_counter.csv",
+        help="Path to MCP Counter results",
+    )
+
+    deconv_args.add_argument(
+        "--quantiseq_path",
+        type=str,
+        default="quantiseq.csv",
+        help="Path to quanTIseq results",
+    )
+
+    deconv_args.add_argument(
+        "--xcell_path",
+        type=str,
+        default="xcell.csv",
+        help="Path to xCell results",
+    )
+
+    deconv_args.add_argument(
+        "--epic_path",
+        type=str,
+        default="epic.csv",
+        help="Path to EPIC results",
     )
 
     parser.add_argument("--version", action="version", version="0.1.0")
@@ -77,14 +137,15 @@ def get_args():
 def processing_transcriptomics(
     clinical_file_path: str,
     tpm_path: str,
-    thorsson_signatures_path: str = "Thorsson_Scores_160_Signatures.tsv",
-    estimate_signatures_path: str = "Yoshihara_ESTIMATE_XXX_RNAseqV2.txt",
+    thorsson_scores_path: str = "Thorsson_Scores_160_Signatures.tsv",
+    estimate_scores_path: str = "Yoshihara_ESTIMATE_XXX_RNAseqV2.txt",
     absolute_tumor_purity_path: str = "ABSOLUTE_tumor_purity.txt",
-    gibbons_signatures_path: str = "Gibbons_supp1.xlsx",
+    gibbons_scores_path: str = "Gibbons_supp1.xlsx",
     mcp_counter_path: str = "mcp_counter.csv",
     quantiseq_path: str = "quantiseq.csv",
     xcell_path: str = "xcell.csv",
     epic_path: str = "epic.csv",
+    mfp_gene_signatures_path: str = "assets/gene_signatures.gmt",
 ):
     """Compute and combine cell type abundances from different quantification methods necessary for TF learning
 
@@ -94,10 +155,10 @@ def processing_transcriptomics(
         tpm_path (str): path pointing to the tpm file (expression matrix)
         slide_type (str, optional): Type of slide, either FF or FFPE. Defaults to "FF".
         path_data (_type_, optional): _description_. Defaults to None.
-        thorsson_signatures_path (str, optional): Path to file with Thorsson signatureds. Defaults to "Thorsson_Scores_160_Signatures.tsv".
-        estimate_signatures_path (str, optional): Path to file with ESTIMATE signatures. Defaults to "Yoshihara_ESTIMATE_XXX_RNAseqV2.txt".
+        thorsson_scores_path (str, optional): Path to file with Thorsson signatureds. Defaults to "Thorsson_Scores_160_Signatures.tsv".
+        estimate_scores_path (str, optional): Path to file with ESTIMATE signatures. Defaults to "Yoshihara_ESTIMATE_XXX_RNAseqV2.txt".
         absolute_tumor_purity_path (str, optional): Path to file with ABSOLUTE tumor purity. Defaults to "ABSOLUTE_tumor_purity.txt".
-        gibbons_signatures_path (str, optional): Path to Gibbons signatures. Defaults to "Gibbons_supp1.xlsx".
+        gibbons_scores_path (str, optional): Path to Gibbons signatures. Defaults to "Gibbons_supp1.xlsx".
         mcp_counter_path (str, optional): Path to results of MCP counter. Defaults to "mcp_counter.csv".
         quantiseq_path (str, optional): Path to results of Quantiseq. Defaults to "quantiseq.csv".
         xcell_path (str, optional): Path to results of Xcell. Defaults to "xcell.csv".
@@ -146,14 +207,14 @@ def processing_transcriptomics(
     all_slide_features = clinical_file.loc[:, var_IDs]
 
     # Published Data
-    Thorsson = pd.read_csv(thorsson_signatures_path, sep="\t")
+    Thorsson = pd.read_csv(thorsson_scores_path, sep="\t")
     estimate = pd.read_csv(
-        estimate_signatures_path,
+        estimate_scores_path,
         sep="\t",
     )
     tcga_absolute = pd.read_csv(absolute_tumor_purity_path, sep="\t")
     gibbons = pd.read_excel(
-        gibbons_signatures_path,
+        gibbons_scores_path,
         skiprows=2,
         sheet_name="DataFileS1 - immune features",
     )
@@ -165,7 +226,9 @@ def processing_transcriptomics(
     EPIC = pd.read_csv(epic_path, index_col=0, sep=",")
 
     # Re(compute) Fges scores with TPM
-    Fges_computed = preprocessing.compute_gene_signature_scores(tpm_path)
+    Fges_computed = preprocessing.compute_gene_signature_scores(
+        tpm_path=tpm_path, gmt_signatures_path=mfp_gene_signatures_path
+    )
     Fges_computed = Fges_computed.loc[:, ["Effector_cells", "Endothelium", "CAF"]]
     Fges_computed.columns = ["Effector cells", "Endothelium", "CAFs (Bagaev)"]
 
@@ -329,14 +392,15 @@ def main(args):
     tasks, var_dict = processing_transcriptomics(
         clinical_file_path=args.clinical_file_path,
         tpm_path=args.tpm_path,
-        thorsson_signatures_path=args.thorsson_signatures_path,
-        estimate_signatures_path=args.estimate_signatures_path,
+        thorsson_scores_path=args.thorsson_scores_path,
+        estimate_scores_path=args.estimate_scores_path,
         absolute_tumor_purity_path=args.absolute_tumor_purity_path,
-        gibbons_signatures_path=args.gibbons_signatures_path,
+        gibbons_scores_path=args.gibbons_scores_path,
         mcp_counter_path=args.mcp_counter_path,
         quantiseq_path=args.quantiseq_path,
         xcell_path=args.xcell_path,
         epic_path=args.epic_path,
+        mfp_gene_signatures_path=args.mfp_gene_signatures_path,
     )
     tasks.to_csv(Path(args.output_dir, "ensembled_selected_tasks.csv"), sep="\t")
     joblib.dump(var_dict, Path(args.output_dir, "task_selection_names.pkl"))

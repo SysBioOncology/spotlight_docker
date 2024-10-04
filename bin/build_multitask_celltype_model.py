@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
 #  Module imports
 import argparse
+import multiprocessing
 import os
+import time
+from argparse import ArgumentParser as AP
+from os.path import abspath
+from pathlib import Path
+
 import dask.dataframe as dd
 import joblib
-import numpy as np
-import pandas as pd
-from sklearn import linear_model, metrics
-from sklearn.model_selection import GridSearchCV, GroupKFold
-from sklearn.preprocessing import StandardScaler
 
 # Custom imports
 import model.evaluate as meval
 import model.preprocessing as preprocessing
 import model.utils as utils
-
-from argparse import ArgumentParser as AP
-
-from os.path import abspath
-import time
-from pathlib import Path
-import multiprocessing
+import numpy as np
+import pandas as pd
+from sklearn import linear_model, metrics
+from sklearn.model_selection import GridSearchCV, GroupKFold
+from sklearn.preprocessing import StandardScaler
 
 
 def get_args():
@@ -35,17 +34,11 @@ def get_args():
     # Inputs
     inputs_group = parser.add_argument_group("Inputs")
     inputs_group.add_argument(
-        "--tile_quantification_path",
-        type=str,
-        help="Path to csv file with tile-level quantification (predictions)",
-        required=True,
-    )
-    inputs_group.add_argument(
-        "--path_target_features",
+        "--target_features_path",
         help="Path pointing to file containing the cell type abundances",
     )
     inputs_group.add_argument(
-        "--path_bottleneck_features",
+        "--bottleneck_features_path",
         help="Path pointing to file containing the histopathological features",
     )
 
@@ -89,7 +82,10 @@ def get_args():
         default=-1,
     )
     gridsearch_group.add_argument(
-        "--n_steps", help="Stepsize for grid [alpha_min, alpha_max]", default=40
+        "--n_steps",
+        help="Stepsize for grid [alpha_min, alpha_max]",
+        default=40,
+        type=int,
     )
 
     # Cross validation
@@ -111,15 +107,16 @@ def get_args():
         help="Split level of slides for creating splits",
         default="sample_submitter_id",
     )
+
     parser.add_argument("--version", action="version", version="0.1.0")
     arg = parser.parse_args()
     arg.output_dir = abspath(arg.output_dir)
 
     if (arg.output_dir != "") & (not os.path.isdir(arg.output_dir)):
-        arg.output_dir = Path(args.output_dir, "models", arg.category)
+        arg.output_dir = Path(arg.output_dir, "models", arg.category)
         os.mkdir(arg.output_dir)
     else:
-        arg.output_dir = Path(args.output_dir, arg.category)
+        arg.output_dir = Path(arg.output_dir, arg.category)
         os.mkdir(arg.output_dir)
 
     if arg.n_cores is None:
@@ -164,7 +161,7 @@ def nested_cv_multitask(
             _type_:
     """
     # Hyperparameter grid for tuning
-    alphas = np.logspace(alpha_min, alpha_max, n_steps)
+    alphas = np.logspace(int(alpha_min), int(alpha_max), int(n_steps))
     scoring = meval.custom_spearmanr
 
     # Load data
@@ -186,7 +183,7 @@ def nested_cv_multitask(
     )
 
     # Load bottleneck features
-    if Path(bottleneck_features_path).suffix == "txt":
+    if Path(bottleneck_features_path).suffix == ".txt":
         # FF slides
         bottleneck_features = pd.read_csv(
             bottleneck_features_path,
@@ -335,7 +332,7 @@ def main(args):
         slide_type=args.slide_type,
         n_jobs=args.n_cores,
         var_names_path=args.var_names_path,
-        target_features_path=args.target_features,
+        target_features_path=args.target_features_path,
     )
 
     # Store for reproduction of outer scores

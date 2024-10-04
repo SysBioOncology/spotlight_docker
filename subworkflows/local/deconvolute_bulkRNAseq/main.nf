@@ -8,11 +8,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CREATE_TPM_MATRIX } from '../../modules/local/createtpmmatrix.nf'
-include { IMMUNEDECONV as QUANTISEQ } from '../../modules/local/immunedeconv.nf'
-include { IMMUNEDECONV as MCP_COUNTER } from '../../modules/local/immunedeconv.nf'
-include { IMMUNEDECONV as XCELL } from '../../modules/local/immunedeconv.nf'
-include { IMMUNEDECONV as EPIC } from '../../modules/local/immunedeconv.nf'
+include { CREATE_TPM_MATRIX } from '../../../modules/local/createtpmmatrix.nf'
+include { IMMUNEDECONV as QUANTISEQ } from '../../../modules/local/immunedeconv.nf'
+include { IMMUNEDECONV as MCP_COUNTER } from '../../../modules/local/immunedeconv.nf'
+include { IMMUNEDECONV as XCELL } from '../../../modules/local/immunedeconv.nf'
+include { IMMUNEDECONV as EPIC } from '../../../modules/local/immunedeconv.nf'
 
 workflow CELLTYPE_QUANTIFICATION_BULKRNASEQ {
     take: 
@@ -28,7 +28,7 @@ workflow CELLTYPE_QUANTIFICATION_BULKRNASEQ {
     // // Immune deconvolution
     // Channel.of(                                 // channel: [tool name, csv]
     //     ["quantiseq", quantiseq_path],
-    //     ["mpc_counter", mpc_counter_path],
+    //     ["mcp_counter", mcp_counter_path],
     //     ["xcell", xcell_path],
     //     ["epic", epic_path]
     // )

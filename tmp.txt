@@ -1,6 +1,0 @@
-touch "${prefix}_features_ND_ES.csv"
-touch "${prefix}_features_ND_sims.csv"
-touch "${prefix}_features_ND.csv"
-touch "${prefix}_features_ND_sim_assignments.pkl"
-touch "${prefix}_shapiro_tests.csv"
-touch "${prefix}_graphs.pkl"

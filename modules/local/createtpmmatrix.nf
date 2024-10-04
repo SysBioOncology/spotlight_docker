@@ -12,6 +12,7 @@ process CREATE_TPM_MATRIX {
 
     script: 
     """
+
     /usr/local/bin/_entrypoint.sh Rscript ${projectDir}/bin/create_tpm_matrix.R --gene_exp_path ${gene_exp_path}
     """
 

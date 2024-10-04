@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,6 @@
 # limitations under the License.
 # ==============================================================================
 """Generic training script that trains a model using a given dataset."""
-
 
 import tensorflow.compat.v1 as tf
 import tf_slim as slim
@@ -278,7 +278,6 @@ def softmax_cross_entropy(
     loss_collection=ops.GraphKeys.LOSSES,
     reduction=Reduction.SUM_BY_NONZERO_WEIGHTS,
 ):
-
     if onehot_labels is None:
         raise ValueError("onehot_labels must not be None.")
     if logits is None:

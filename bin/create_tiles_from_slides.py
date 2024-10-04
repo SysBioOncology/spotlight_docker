@@ -1,44 +1,50 @@
 #!/usr/bin/env python3
-import tiffslide as openslide
-import os
 import argparse
 import glob
-import numpy as np
-from PIL import Image
-
+import os
+import time
 from argparse import ArgumentParser as AP
 from os.path import abspath
-import time
 from pathlib import Path
 
 import DL.image as im
+import numpy as np
+import tiffslide as openslide
+from PIL import Image
+
 
 def get_args():
     # Script description
     description = """Creating tiles from a slide"""
 
     # Add parser
-    parser = AP(description=description,
-                formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = AP(
+        description=description, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
 
     # Sections
     parser = argparse.ArgumentParser()
-    parser.add_argument("--filename_slide", help="Name of slide", default = "")
-    parser.add_argument("--slides_folder", help="Set slides folder", default = None)
-    parser.add_argument("--slide_path", help="Path to individual slide", default = None)
-    parser.add_argument("--output_dir", help="Set output folder", default = "")
-    parser.add_argument("--clin_path", help="Set clinical file path", default = None)
-    parser.add_argument("--gradient_mag_filter", help = "Threshold for filtering", default = 20)
+    parser.add_argument("--filename_slide", help="Name of slide", default="")
+    parser.add_argument("--slides_folder", help="Set slides folder", default=None)
+    parser.add_argument("--slide_path", help="Path to individual slide", default=None)
+    parser.add_argument("--output_dir", help="Set output folder", default="")
+    parser.add_argument("--clin_path", help="Set clinical file path", default=None)
+    parser.add_argument(
+        "--gradient_mag_filter", help="Threshold for filtering", default=20
+    )
     parser.add_argument("--version", action="version", version="0.1.0")
     arg = parser.parse_args()
     arg.output_dir = abspath(arg.output_dir)
 
-    if ((arg.output_dir != "") & (not os.path.isdir(arg.output_dir))):
+    if (arg.output_dir != "") & (not os.path.isdir(arg.output_dir)):
         arg.output_dir = Path(arg.output_dir, "tiles")
         os.mkdir(arg.output_dir)
     return arg
 
-def create_tiles_from_slide(slide_filename, slides_folder, gradient_mag_filter = 20, slide_path = None):
+
+def create_tiles_from_slide(
+    slide_filename, slides_folder, gradient_mag_filter=20, slide_path=None
+):
     """
     Create tiles from a single slide
     Dividing the whole slide images into tiles with a size of 512 x 512 pixels, with an overlap of 50 pixels at a magnification of 20x. In addition, remove blurred and non-informative tiles by using the weighted gradient magnitude.
@@ -56,20 +62,14 @@ def create_tiles_from_slide(slide_filename, slides_folder, gradient_mag_filter =
         jpg files for the created tiles in the specified folder {output_dir}/tiles
 
     """
-     # Accept different file types
-    if slide_filename.endswith(('.svs', '.ndpi', '.tif')):
-        if (slide_path is not None):
+    # Accept different file types
+    if slide_filename.endswith((".svs", ".ndpi", ".tif")):
+        if slide_path is not None:
             slide = openslide.OpenSlide(slide_path)
         else:
-            slide = openslide.OpenSlide(
-            "{}/{}".format(slides_folder, slide_filename))
+            slide = openslide.OpenSlide("{}/{}".format(slides_folder, slide_filename))
         slide_name = slide_filename.split(".")[0]
-        if (
-            str(slide.properties["tiff.ImageDescription"]).find(
-                "AppMag = 40"
-            )
-            != -1
-        ):
+        if str(slide.properties["tiff.ImageDescription"]).find("AppMag = 40") != -1:
             region_size = 1024
             tile_size = 924
         else:
@@ -86,26 +86,32 @@ def create_tiles_from_slide(slide_filename, slides_folder, gradient_mag_filter =
                     size=(region_size, region_size),
                 )
                 slide_region_converted = slide_region.convert("RGB")
-                tile = slide_region_converted.resize(
-                    (512, 512), Image.ANTIALIAS)
+                tile = slide_region_converted.resize((512, 512), Image.ANTIALIAS)
                 grad = im.getGradientMagnitude(np.array(tile))
                 unique, counts = np.unique(grad, return_counts=True)
-                if counts[np.argwhere(unique <= int(gradient_mag_filter))].sum() < 512 * 512 * 0.6:
+                if (
+                    counts[np.argwhere(unique <= int(gradient_mag_filter))].sum()
+                    < 512 * 512 * 0.6
+                ):
                     list_of_tiles.append((tile, slide_name, x_coord, y_coord))
-        return(list_of_tiles)
+        return list_of_tiles
+
 
 def main(args):
-    list_of_tiles = create_tiles_from_slide(slides_folder=args.slides_folder, gradient_mag_filter=args.gradient_mag_filter, slide_filename = args.filename_slide, slide_path= args.slide_path)
+    list_of_tiles = create_tiles_from_slide(
+        slides_folder=args.slides_folder,
+        gradient_mag_filter=args.gradient_mag_filter,
+        slide_filename=args.filename_slide,
+        slide_path=args.slide_path,
+    )
     n_tiles = len(list_of_tiles)
     for tile in list_of_tiles:
         tile[0].save(
-            "{}/{}_{}_{}.jpg".format(
-                args.output_dir, tile[1], tile[2], tile[3]
-            ),
+            "{}/{}_{}_{}.jpg".format(args.output_dir, tile[1], tile[2], tile[3]),
             "JPEG",
             optimize=True,
             quality=94,
-    )
+        )
         # Check if all tiles were saved
     assert len(glob.glob1(Path(args.output_dir), "*.jpg")) == n_tiles
 

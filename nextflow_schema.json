@@ -382,7 +382,7 @@
     },
     "deconv_tools": {
       "type": "string",
-      "default": "quantiseq,mpc_counter,xcell,epic"
+      "default": "quantiseq,mcp_counter,xcell,epic"
     },
     "gene_exp_path": {
       "type": "string",
@@ -395,7 +395,7 @@
       "type": "string",
       "default": "assets/NO_FILE"
     },
-    "mpc_counter_path": {
+    "mcp_counter_path": {
       "type": "string",
       "default": "assets/NO_FILE"
     },

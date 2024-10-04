@@ -1,5 +1,5 @@
 
-process TILING_SINGLE_SLIDE {
+process TILE_SLIDE {
     label 'process_medium'
     label 'extract_histo_patho_features'
 
