@@ -12,7 +12,6 @@
 ##    GENERAL OPTIONS
 ## -----------------------------------------------------------------------------
 
-# spotlight_modules: "deconvbulk,buildmodel"
 spotlight_modules: "extracthistopatho,predicttiles,computespatial"
 
 clinical_files_input: "assets/NO_FILE"
