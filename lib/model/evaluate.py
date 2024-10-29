@@ -1,11 +1,11 @@
+import os
+from pathlib import Path
+
 import joblib
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
 from scipy.stats import pearsonr, spearmanr
-import os
-import logging
-from pathlib import Path
 
 
 def custom_spearmanr(x, y, in_gridsearch=True):
@@ -149,28 +149,20 @@ def compute_tile_predictions(
         index_pred[i] = X_test.index
 
     if any([prediction_mode == item for item in ["tcga_train_validation", "test"]]):
+        # Adapt for chosen number of folds
         combi_scores = np.concatenate(
-            (
-                test_pred[0][:, np.newaxis],
-                test_pred[1][:, np.newaxis],
-                test_pred[2][:, np.newaxis],
-                test_pred[3][:, np.newaxis],
-                test_pred[4][:, np.newaxis],
-            ),
-            axis=1,
+            [test_pred[i][:, np.newaxis] for i in test_pred.keys()], axis=1
         )
+
         # Average across folds for final prediction
         combi_scores = combi_scores.mean(axis=1)
         combi_indexes = index_pred[1]
 
     elif prediction_mode == "tcga_validation":
-        combi_scores = np.concatenate(
-            (test_pred[0], test_pred[1], test_pred[2], test_pred[3], test_pred[4]),
-            axis=0,
-        )
+        # Adapt for chosen number of folds
+        combi_scores = np.concatenate([test_pred[i] for i in test_pred.keys()], axis=0)
         combi_indexes = np.concatenate(
-            (index_pred[0], index_pred[1], index_pred[2], index_pred[3], index_pred[4]),
-            axis=0,
+            [index_pred[i] for i in index_pred.keys()], axis=0
         )
 
     print("Finished with predictions for cell type: {}...".format(cell_type))
@@ -209,4 +201,5 @@ def compute_correlations(df1, df2, corr_method="pearson"):
                 pvalues[r][c] = pearsonr(df1[r], df2[c])[1]
                 corr_coefs[r][c] = spearmanr(df1[r], df2[c])[0]
 
+    return [corr_coefs.astype(float), pvalues.astype(float)]
     return [corr_coefs.astype(float), pvalues.astype(float)]

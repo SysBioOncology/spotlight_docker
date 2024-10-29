@@ -49,6 +49,25 @@ Input files:
 
 ## Building a multi-task cell type model to predict cell type abundances on a tile-level
 
+### Set up 
+
+1. Download TCGA bulkRNAseq data via the [Firehose Tool](https://gdac.broadinstitute.org) from the BROAD Institute, the files required are: “illuminahiseq_rnaseqv2-RSEM_genes”.
+2. Unzip the downloaded file (.tar.gz)
+3. Download the signatures/published scores, see table below.
+
+| Parameter                  | Reference                                                 | Additional info                                                                                                                                                |
+| -------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `absolute_tumor_purity_path` | https://gdc.cancer.gov/about-data/publications/panimmune  | Download the 'Score for 160 Genes Signatures in Tumor Samples' or use [direct link]( https://api.gdc.cancer.gov/data/80a82092-161d-4615-9d96-e858f113618d)        |
+| `estimate_scores_path` | https://bioinformatics.mdanderson.org/estimate/index.html | Download the relevant file for the cancer type of interest, use the RNA-seqV2 column on the page.                                                                                                    |
+| `gibbons_scores_path` | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5503821/     | Download the 'Supp Datafile S1.' or use the (direct link)[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5503821/bin/NIHMS840944-supplement-Supp_Datafile_S1.xlsx] |
+| `thorsson_scores_path` | https://gdc.cancer.gov/about-data/publications/panimmune  | Download the 'ABSOLUTE purity/ploidy file', or use [direct link](https://api.gdc.cancer.gov/data/4f277128-f793-4354-a13d-30cc7fe9f6b5)                           |
+
+4. Update the `nf-params.yml` for the following parameters: `thorsson_scores_path`,     `estimate_scores_path`,  `absolute_tumor_purity_path` and `gibbons_scores_path`.
+5. Review other parameters relevant for this module in the same `yml` file. (see section below)
+6. Run the pipeline, do not forget to include `buildmodel` in the `spotlight_modules` parameter.
+
+### Parameters 
+
 * `clinical_file_path`: Path to clinical file (`.csv`), at least have the following columns: 'sample_submitter_id' and 'slide_submitter_id'. If **module `extracthistopatho`** is run, setting this parameter is **optional**.
 
 **Publicly available scores** 

@@ -1,9 +1,5 @@
 # SysBioOncology/spotlight_docker: Usage
 
-## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/spotlight/usage](https://nf-co.re/spotlight/usage)
-
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
-
 ## Introduction
 
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
@@ -13,10 +9,10 @@
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run SysBioOncology/spotlight_docker --outdir ./results -profile docker
+nextflow run SysBioOncology/spotlight_docker --outdir ./results -profile apptainer
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+This will launch the pipeline with the `apptainer` configuration profile. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -38,10 +34,10 @@ Do not use `-c <file>` to specify parameters as this will result in errors. Cust
 The above pipeline run specified with a params file in yaml format:
 
 ```bash
-nextflow run SysBioOncology/spotlight_docker -profile docker -params-file params.yaml
+nextflow run SysBioOncology/spotlight_docker -profile apptainer -params-file nf-params.yml
 ```
 
-with `params.yaml` containing:
+with `params.yml` containing:
 
 ```yaml
 
@@ -51,28 +47,6 @@ outdir: './results/'
 ```
 
 You can also generate such `YAML` / `JSON` files via [nf-core/launch](https://nf-co.re/launch).
-
-### Updating the pipeline
-
-When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
-
-```bash
-nextflow pull SysBioOncology/spotlight_docker
-```
-
-### Reproducibility
-
-It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
-
-First, go to the [SysBioOncology/spotlight_docker releases page](https://github.com/SysBioOncology/spotlight_docker/releases) and find the latest pipeline version - numeric only (eg. `1.3.1` ). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1` . Of course, you can switch to another version by changing the number after the `-r` flag.
-
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
-
-To further assist in reproducbility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
-
-:::tip
-If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
-:::
 
 ## Core Nextflow arguments
 

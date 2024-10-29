@@ -111,6 +111,13 @@ def get_args():
     parser.add_argument("--version", action="version", version="0.1.0")
     arg = parser.parse_args()
     arg.output_dir = abspath(arg.output_dir)
+    # Ensure type is correct
+    arg.alpha_min = int(arg.alpha_min)
+    arg.alpha_max = int(arg.alpha_max)
+    arg.n_steps = int(arg.n_steps)
+    arg.n_innerfolds = int(arg.n_innerfolds)
+    arg.n_outerfolds = int(arg.n_outerfolds)
+    arg.n_tiles = int(arg.n_tiles)
 
     if (arg.output_dir != "") & (not os.path.isdir(arg.output_dir)):
         arg.output_dir = Path(arg.output_dir, "models", arg.category)

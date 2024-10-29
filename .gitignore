@@ -61,3 +61,5 @@ nf-params-tcga.yml
 nf-params-xenium.yml
 
 scratch.ipynb
+quick_run.sh
+scratch.py
