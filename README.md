@@ -76,7 +76,6 @@ SPoTLIghT generates the following output directory structure for a run with FFPE
 │   ├── file_info_train.txt
 │   ├── generated_clinical_file.txt
 │   ├── pred_train.txt
-|   ├── process_train
 │   ├── predictions_format_parquet
 │   │   ├── predictions-0.parquet
 │   │   ├── predictions-0.parquet
@@ -88,10 +87,59 @@ SPoTLIghT generates the following output directory structure for a run with FFPE
 │       ├── xenium-skin-panel_10165_10165.jpg
 │       ├── xenium-skin-panel_10165_10627.jpg
 │       ├── xenium-skin-panel_10165_11089.jpg
-├── 2_tile_level_quantification
+├── 2_deconv_bulk_rnaseq
+│   ├── epic.csv
+│   ├── mcp_counter.csv
+│   ├── quantiseq.csv
+│   ├── tpm.txt
+│   └── xcell.csv
+├── 3_build_multi_task_celltype_model
+│   ├── CAFs
+│   │   ├── cv_outer_splits.pkl
+│   │   ├── outer_models.pkl
+│   │   ├── outer_scores_slides_test.pkl
+│   │   ├── outer_scores_slides_train.pkl
+│   │   ├── outer_scores_tiles_test.pkl
+│   │   ├── outer_scores_tiles_train.pkl
+│   │   ├── total_tile_selection.pkl
+│   │   ├── x_train_scaler.pkl
+│   │   └── y_train_scaler.pkl
+│   ├── T_cells
+│   │   ├── cv_outer_splits.pkl
+│   │   ├── outer_models.pkl
+│   │   ├── outer_scores_slides_test.pkl
+│   │   ├── outer_scores_slides_train.pkl
+│   │   ├── outer_scores_tiles_test.pkl
+│   │   ├── outer_scores_tiles_train.pkl
+│   │   ├── total_tile_selection.pkl
+│   │   ├── x_train_scaler.pkl
+│   │   └── y_train_scaler.pkl
+│   ├── endothelial_cells
+│   │   ├── cv_outer_splits.pkl
+│   │   ├── outer_models.pkl
+│   │   ├── outer_scores_slides_test.pkl
+│   │   ├── outer_scores_slides_train.pkl
+│   │   ├── outer_scores_tiles_test.pkl
+│   │   ├── outer_scores_tiles_train.pkl
+│   │   ├── total_tile_selection.pkl
+│   │   ├── x_train_scaler.pkl
+│   │   └── y_train_scaler.pkl
+│   ├── ensembled_selected_tasks.csv
+│   ├── task_selection_names.pkl
+│   └── tumor_purity
+│       ├── cv_outer_splits.pkl
+│       ├── outer_models.pkl
+│       ├── outer_scores_slides_test.pkl
+│       ├── outer_scores_slides_train.pkl
+│       ├── outer_scores_tiles_test.pkl
+│       ├── outer_scores_tiles_train.pkl
+│       ├── total_tile_selection.pkl
+│       ├── x_train_scaler.pkl
+│       └── y_train_scaler.pkl
+├── 4_tile_level_quantification
 │   ├── test_tile_predictions_proba.csv
 │   └── test_tile_predictions_zscores.csv
-├── 3_spatial_features
+├── 5_spatial_features
 │   ├── clustering_features
 │   │   ├── FFPE_all_schc_clusters_labeled.csv
 │   │   ├── FFPE_all_schc_tiles.csv

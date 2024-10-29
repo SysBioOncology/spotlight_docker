@@ -2,10 +2,14 @@
 import argparse
 import multiprocessing
 import os
+import sys
 import time
 from argparse import ArgumentParser as AP
 from os.path import abspath
 from pathlib import Path
+
+# TEMPORARY
+sys.path.append("/cluster/projects/gaitigroup/Users/Joan/spotlight_docker/lib")
 
 import joblib
 import model.preprocessing as preprocessing
@@ -234,6 +238,10 @@ def processing_transcriptomics(
 
     Fges_computed = Fges_computed.reset_index()
     Fges_computed = Fges_computed.rename(columns={"index": "TCGA_sample"})
+    # Ensure correct ID format
+    Fges_computed.TCGA_sample = Fges_computed.TCGA_sample.str.replace(
+        "\\.", "-", regex=True
+    ).str[0:15]
 
     # From immunedeconv
     quantiseq = preprocessing.process_immunedeconv(quantiseq, "quanTIseq")
@@ -250,6 +258,8 @@ def processing_transcriptomics(
     cellfrac = pd.merge(xCell, quantiseq, on=["TCGA_sample"])
     cellfrac = pd.merge(cellfrac, mcp_counter, on=["TCGA_sample"])
     cellfrac = pd.merge(cellfrac, EPIC, on=["TCGA_sample"])
+    # Ensure correct ID format
+    cellfrac = cellfrac.set_index(cellfrac.index.str[0:15])
 
     # estimate data
     estimate = estimate.rename(columns={"ID": "TCGA_sample"})
@@ -411,4 +421,5 @@ if __name__ == "__main__":
     st = time.time()
     main(args)
     rt = time.time() - st
+    print(f"Script finished in {rt // 60:.0f}m {rt % 60:.0f}s")
     print(f"Script finished in {rt // 60:.0f}m {rt % 60:.0f}s")
