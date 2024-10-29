@@ -1,4 +1,4 @@
-# Integrating histopathology and transcriptomics for spatial profiling of the tumor microenvironment: a melanoma case study
+# Integrating histopathology and transcriptomics for spatial tumor microenvironment profiling in a melanoma case study
 
 > Pipeline has been successfully tested with fresh frozen (FF) slides only. Currently, only the TF models for SKCM (melanoma) are readily available in /data/TF_models.
 
